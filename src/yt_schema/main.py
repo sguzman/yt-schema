@@ -1,6 +1,9 @@
 import logging
 import json
 
+from yt_schema.construct import create
+from yt_schema.tables import insert
+
 
 def load_json():
     logging.info("load_json")
@@ -15,7 +18,10 @@ logging.basicConfig(
 
 def main():
     logging.info("start")
-    _ = load_json()
+    js = load_json()
+    payload = create(js)
+    insert(payload)
+
     logging.info("end")
 
 
