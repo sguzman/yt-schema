@@ -31,10 +31,6 @@ class Version(BaseModel):
     version = p.TextField()
 
 
-class FilesToMove(BaseModel):
-    file = p.TextField(null=True)
-
-
 class FormatSortField(BaseModel):
     field = p.TextField(unique=True)
 
@@ -225,26 +221,14 @@ class Entry(BaseModel):
     width = p.IntegerField()
 
 
-class ChannelThumbnail(BaseModel):
-    thumbnail_id = p.TextField(unique=True)
-    preference = p.IntegerField(null=True)
-    resolution = p.TextField(null=True)
-    url = p.TextField()
-    width = p.IntegerField(null=True)
-    height = p.IntegerField(null=True)
-
-
 class Payload(BaseModel):
-    files_to_move = p.ForeignKeyField(FilesToMove)
     type_of = p.TextField()
-    version = p.ForeignKeyField(Version)
     availability = p.BooleanField(null=True)
     channel = p.TextField(unique=True)
     channel_follower_count = p.IntegerField(null=True)
     channel_id = p.TextField(unique=True)
     channel_url = p.TextField()
     description = p.TextField()
-    entries = p.ForeignKeyField(Entry)
     epoch = p.DateTimeField()
     extractor = p.TextField()
     extractor_key = p.TextField()
@@ -253,8 +237,6 @@ class Payload(BaseModel):
     original_url = p.TextField()
     playlist_count = p.IntegerField(null=True)
     release_year = p.IntegerField(null=True)
-    tags = p.ForeignKeyField(Tag)
-    thumbnails = p.ForeignKeyField(ChannelThumbnail)
     title = p.TextField(unique=True)
     uploader = p.TextField(unique=True)
     uploader_id = p.TextField(unique=True)
@@ -265,9 +247,18 @@ class Payload(BaseModel):
     webpage_url_host = p.TextField()
 
 
+class ChannelThumbnail(BaseModel):
+    channel_id = p.ForeignKeyField(Payload)
+    thumbnail_id = p.TextField(unique=True)
+    preference = p.IntegerField(null=True)
+    resolution = p.TextField(null=True)
+    url = p.TextField()
+    width = p.IntegerField(null=True)
+    height = p.IntegerField(null=True)
+
+
 tables = [
     Version,
-    FilesToMove,
     FormatSortField,
     Caption,
     AutomaticCaptions,
@@ -294,12 +285,15 @@ db.create_tables(tables)
 
 def version(data: Dict) -> Version:
     logging.info("version")
-    return Version(
+    v = Version(
         current_git_head=data.get("current_git_head"),
         release_git_head=data.get("release_git_head"),
         repository=data.get("repository"),
         version=data.get("version"),
     )
+
+    logging.debug(v)
+    return v
 
 
 def fragments(data: List[Dict]) -> List[Fragment]:
@@ -312,6 +306,7 @@ def fragments(data: List[Dict]) -> List[Fragment]:
         )
         fragments.append(f)
 
+    logging.debug(fragments)
     return fragments
 
 
@@ -330,6 +325,7 @@ def http_headers(data: List[Dict]) -> List[HttpHeader]:
         )
         http_headers.append(h)
 
+    logging.debug(http_headers)
     return http_headers
 
 
@@ -368,6 +364,7 @@ def formats(data: List[Dict]) -> List[Format]:
         )
         formats.append(f)
 
+    logging.debug(formats)
     return formats
 
 
@@ -385,8 +382,10 @@ def heatmaps(data: List[Dict]) -> List[Heatmap]:
             start_time=d.get("start_time"),
             value=d.get("value"),
         )
+        h.save()
         heatmaps.append(h)
 
+    logging.debug(heatmaps)
     return heatmaps
 
 
@@ -424,6 +423,7 @@ def requested_download(data: List[Dict]) -> List[RequestedDownload]:
         )
         requested_downloads.append(rd)
 
+    logging.debug(requested_downloads)
     return requested_downloads
 
 
@@ -443,6 +443,7 @@ def subtitle(data: List[Dict]) -> List[Subtitle]:
         )
         subtitles.append(s)
 
+    logging.debug(subtitles)
     return subtitles
 
 
@@ -461,10 +462,11 @@ def subtitle_type(data: Dict) -> List[SubtitleType]:
         )
         subtitles.append(s)
 
+    logging.debug(subtitles)
     return subtitles
 
 
-def entries(data: List[Dict]) -> List[Entry]:
+def entries(channel_id: Payload, data: List[Dict]) -> List[Entry]:
     logging.info(f"{len(data)} entries")
     entries = []
     for d in data:
@@ -547,6 +549,8 @@ def entries(data: List[Dict]) -> List[Entry]:
         )
 
         entries.append(e)
+
+    logging.debug(entries)
     return entries
 
 
@@ -562,6 +566,7 @@ def tags(data: List[str]) -> List[Tag]:
         t = Tag(tag=d)
         tags.append(t)
 
+    logging.debug(tags)
     return tags
 
 
@@ -581,10 +586,11 @@ def video_thumbnails(data: List[Dict]) -> List[VideoThumbnail]:
         )
         thumbnails.append(t)
 
+    logging.debug(thumbnails)
     return thumbnails
 
 
-def channel_thumbnails(data: List[Dict]) -> List[ChannelThumbnail]:
+def channel_thumbnails(channel: Payload, data: List[Dict]) -> List[ChannelThumbnail]:
     # If none
     if data is None:
         logging.info("channel_thumbnails is none")
@@ -603,22 +609,21 @@ def channel_thumbnails(data: List[Dict]) -> List[ChannelThumbnail]:
         )
         thumbnails.append(t)
 
+    logging.debug(thumbnails)
     return thumbnails
 
 
 def payload(data: Dict) -> Payload:
     logging.info("payload")
-    return Payload(
-        files_to_move=data.get("__files_to_move"),
+
+    p = Payload.create(
         type_of=data.get("_type"),
-        version=version(data.get("_version")),
         availability=data.get("availability"),
         channel=data.get("channel"),
         channel_follower_count=data.get("channel_follower_count"),
         channel_id=data.get("channel_id"),
         channel_url=data.get("channel_url"),
         description=data.get("description"),
-        entries=entries(data.get("entries")),
         epoch=data.get("epoch"),
         extractor=data.get("extractor"),
         extractor_key=data.get("extractor_key"),
@@ -627,8 +632,6 @@ def payload(data: Dict) -> Payload:
         original_url=data.get("original_url"),
         playlist_count=data.get("playlist_count"),
         release_year=data.get("release_year"),
-        tags=tags(data.get("tags")),
-        thumbnails=channel_thumbnails(data.get("thumbnails")),
         title=data.get("title"),
         uploader=data.get("uploader"),
         uploader_id=data.get("uploader_id"),
@@ -639,9 +642,24 @@ def payload(data: Dict) -> Payload:
         webpage_url_host=data.get("webpage_url_host"),
     )
 
+    logging.debug(p)
+
+    # Initialize entries
+    entries(p, data.get("entries"))
+
+    # Initialize version
+    version(p, data.get("_version"))
+
+    # Initialize tags
+    tags(p, data.get("tags"))
+
+    # Initialize Channel Thumbnails
+    channel_thumbnails(p, data.get("thumbnails"))
+
+    logging.debug(p)
+    return p
+
 
 def create(data: Dict):
     logging.info("create")
-    p = payload(data)
-    print(p)
-    p.save()
+    payload(data)
