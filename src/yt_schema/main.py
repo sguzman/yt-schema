@@ -1,8 +1,7 @@
 import logging
 import json
 
-from yt_schema.construct import create
-from yt_schema.tables import insert
+from yt_schema.tables import create
 
 
 def load_json():
@@ -12,16 +11,14 @@ def load_json():
 
 # Enable timestamp and log level in log messages
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
 )
 
 
 def main():
     logging.info("start")
     js = load_json()
-    payload = create(js)
-    insert(payload)
-
+    create(js)
     logging.info("end")
 
 
