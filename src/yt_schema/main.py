@@ -39,8 +39,24 @@ class Version(BaseModel):
     version = p.TextField()
 
 
+class FilesToMove(BaseModel):
+    file = p.TextField(null=True)
+
+
+class FormatSortField(BaseModel):
+    field = p.TextField(unique=True)
+
+
 class Entry(BaseModel):
+    last_playlist_index = p.IntegerField()
+    format_sort_field = p.ForeignKeyField(FormatSortField)
+    has_drm = p.BooleanField(null=True)
     abr = p.DoubleField()
+    acodec = p.TextField()
+    age_limit = p.IntegerField(null=True)
+    aspect_ratio = p.DoubleField()
+    asr = p.IntegerField()
+    audio_channels = p.IntegerField()
 
 
 class Tags(BaseModel):
@@ -57,7 +73,7 @@ class ChannelThumbnail(BaseModel):
 
 
 class Payload(BaseModel):
-    username = p.CharField(unique=True)
+    files_to_move = p.ForeignKeyField(FilesToMove)
     type_of = p.TextField()
     version = p.ForeignKeyField(Version)
     availability = p.BooleanField(null=True)
