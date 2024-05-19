@@ -103,6 +103,56 @@ class Format(BaseModel):
     width = p.IntegerField()
 
 
+class Tag(BaseModel):
+    tag = p.TextField(unique=True)
+
+
+class Heatmap(BaseModel):
+    end_time = p.DoubleField()
+    start_time = p.DoubleField()
+    value = p.DoubleField()
+
+
+class RequestedDownload(BaseModel):
+    write_download_archive = p.BooleanField()
+    filename = p.TextField()
+    abr = p.DoubleField()
+    acodec = p.TextField()
+    aspect_ratio = p.DoubleField()
+    audio_ext = p.TextField()
+    columns = p.IntegerField()
+    ext = p.TextField()
+    filesize_approx = p.IntegerField(null=True)
+    format = p.TextField()
+    format_id = p.TextField(unique=True)
+    format_note = p.TextField()
+    fps = p.DoubleField()
+    height = p.IntegerField()
+    protocol = p.TextField()
+    requested_format = p.ForeignKeyField(Format)
+    resolution = p.TextField()
+    tbr = p.DoubleField()
+    vbr = p.DoubleField()
+    vcodec = p.TextField()
+    width = p.IntegerField()
+
+
+class Subtitle(BaseModel):
+    ext = p.TextField()
+    name = p.TextField()
+    url = p.TextField()
+
+
+class SubtitleType(BaseModel):
+    language = p.TextField()
+    subtitles = p.ForeignKeyField(Subtitle)
+
+
+class VideoThumbnail(BaseModel):
+    thumbnail_id = p.TextField(unique=True)
+    preference = p.IntegerField(null=True)
+
+
 class Entry(BaseModel):
     last_playlist_index = p.IntegerField()
     format_sort_field = p.ForeignKeyField(FormatSortField)
@@ -136,10 +186,50 @@ class Entry(BaseModel):
     format = p.TextField()
     format_id = p.TextField()
     format_note = p.TextField()
-
-
-class Tags(BaseModel):
-    tag = p.TextField(unique=True)
+    formats = p.ForeignKeyField(Format)
+    fps = p.IntegerField()
+    fulltitle = p.TextField(unique=True)
+    heatmap = p.ForeignKeyField(Heatmap)
+    height = p.IntegerField()
+    entry_id = p.TextField(unique=True)
+    is_live = p.BooleanField()
+    language = p.TextField(null=True)
+    like_count = p.IntegerField()
+    live_status = p.TextField()
+    n_entries = p.IntegerField()
+    original_url = p.TextField()
+    playable_in_embed = p.BooleanField()
+    playlist = p.TextField()
+    playlist_auto_number = p.IntegerField()
+    playlist_count = p.IntegerField()
+    playlist_id = p.TextField()
+    playlist_index = p.IntegerField()
+    playlist_title = p.TextField()
+    playlist_uploader = p.TextField()
+    playlist_uploader_id = p.TextField()
+    protocol = p.TextField()
+    release_timestamp = p.DateTimeField(null=True)
+    release_year = p.IntegerField(null=True)
+    requested_download = p.ForeignKeyField(RequestedDownload)
+    requested_formats = p.ForeignKeyField(Format)
+    resolution = p.TextField()
+    stretched_ratio = p.DoubleField(null=True)
+    subtitles = p.ForeignKeyField(SubtitleType)
+    tags = p.ForeignKeyField(Tag)
+    tbr = p.DoubleField()
+    thumbnail = p.TextField()
+    thumbnails = p.ForeignKeyField(VideoThumbnail)
+    title = p.TextField()
+    uploader_date = p.DateTimeField()
+    uploader_id = p.TextField()
+    uploader_url = p.TextField()
+    vbr = p.DoubleField()
+    vcodec = p.TextField()
+    view_count = p.IntegerField()
+    webpage_url = p.TextField()
+    webpage_url_basename = p.TextField()
+    webpage_url_domain = p.TextField()
+    width = p.IntegerField()
 
 
 class ChannelThumbnail(BaseModel):
@@ -170,7 +260,7 @@ class Payload(BaseModel):
     original_url = p.TextField()
     playlist_count = p.IntegerField(null=True)
     release_year = p.IntegerField(null=True)
-    tags = p.ForeignKeyField(Tags)
+    tags = p.ForeignKeyField(Tag)
     thumbnails = p.ForeignKeyField(ChannelThumbnail)
     title = p.TextField(unique=True)
     uploader = p.TextField(unique=True)
@@ -182,7 +272,7 @@ class Payload(BaseModel):
     webpage_url_host = p.TextField()
 
 
-tables = [Payload, Version, Entry, Tags, ChannelThumbnail]
+tables = [Payload, Version, Entry, Tag, ChannelThumbnail]
 
 db.drop_tables(tables, safe=True)
 db.create_tables(tables)
