@@ -4,7 +4,7 @@ import peewee as p
 from typing import Dict, List
 
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
 )
 
 db: p.SqliteDatabase = p.SqliteDatabase("yt.db")
@@ -143,6 +143,7 @@ class SubtitleType(BaseModel):
 class VideoThumbnail(BaseModel):
     thumbnail_id = p.TextField(unique=True)
     preference = p.IntegerField(null=True)
+    url = p.TextField()
 
 
 class Entry(BaseModel):
@@ -315,6 +316,11 @@ def fragments(data: List[Dict]) -> List[Fragment]:
 
 
 def http_headers(data: List[Dict]) -> List[HttpHeader]:
+    # If none
+    if data is None:
+        logging.info("http_headers is none")
+        return []
+
     logging.info(f"{len(data)} http_headers")
     http_headers = []
     for d in data:
@@ -328,6 +334,11 @@ def http_headers(data: List[Dict]) -> List[HttpHeader]:
 
 
 def formats(data: List[Dict]) -> List[Format]:
+    # If none
+    if data is None:
+        logging.info("formats is none")
+        return []
+
     logging.info(f"{len(data)} formats")
     formats = []
     for d in data:
@@ -361,6 +372,11 @@ def formats(data: List[Dict]) -> List[Format]:
 
 
 def heatmaps(data: List[Dict]) -> List[Heatmap]:
+    # If none
+    if data is None:
+        logging.info("heatmaps is none")
+        return []
+
     logging.info(f"{len(data)} heatmaps")
     heatmaps = []
     for d in data:
@@ -378,7 +394,7 @@ def requested_download(data: List[Dict]) -> List[RequestedDownload]:
     # If none
     if data is None:
         logging.info("requested_download is none")
-        return None
+        return []
 
     logging.info(f"{len(data)} requested_download")
     requested_downloads = []
@@ -412,10 +428,14 @@ def requested_download(data: List[Dict]) -> List[RequestedDownload]:
 
 
 def subtitle(data: List[Dict]) -> List[Subtitle]:
+    # If none
+    if data is None:
+        logging.info("subtitle is none")
+        return []
+
     logging.info(f"{len(data)} subtitles")
     subtitles = []
     for sub in data:
-        print(sub)
         s = Subtitle(
             ext=sub.get("ext"),
             name=sub.get("name"),
@@ -427,6 +447,11 @@ def subtitle(data: List[Dict]) -> List[Subtitle]:
 
 
 def subtitle_type(data: Dict) -> List[SubtitleType]:
+    # If none
+    if data is None:
+        logging.info("subtitle_type is none")
+        return []
+
     logging.info(f"{len(data)} subtitles")
     subtitles = []
     for sub in data.keys():
@@ -443,6 +468,7 @@ def entries(data: List[Dict]) -> List[Entry]:
     logging.info(f"{len(data)} entries")
     entries = []
     for d in data:
+        logging.info(f"Video: {d.get('title')}")
         e = Entry(
             last_playlist_index=d.get("__last_playlist_index"),
             format_sort_field=d.get("format_sort_field"),
@@ -525,6 +551,11 @@ def entries(data: List[Dict]) -> List[Entry]:
 
 
 def tags(data: List[str]) -> List[Tag]:
+    # If none
+    if data is None:
+        logging.info("tags is none")
+        return []
+
     logging.info(f"{len(data)} tags")
     tags = []
     for d in data:
@@ -535,13 +566,18 @@ def tags(data: List[str]) -> List[Tag]:
 
 
 def video_thumbnails(data: List[Dict]) -> List[VideoThumbnail]:
-    logging.info(f"{len(data)} thumbnails")
+    # If none
+    if data is None:
+        logging.info("video_thumbnails is none")
+        return []
+
+    logging.info(f"{len(data)} video thumbnails")
     thumbnails = []
     for d in data:
         t = VideoThumbnail(
             thumbnail_id=d.get("thumbnail_id"),
             preference=d.get("preference"),
-            resolution=d.get("resolution"),
+            url=d.get("url"),
         )
         thumbnails.append(t)
 
@@ -549,7 +585,12 @@ def video_thumbnails(data: List[Dict]) -> List[VideoThumbnail]:
 
 
 def channel_thumbnails(data: List[Dict]) -> List[ChannelThumbnail]:
-    logging.info(f"{len(data)} thumbnails")
+    # If none
+    if data is None:
+        logging.info("channel_thumbnails is none")
+        return []
+
+    logging.info(f"{len(data)} channel thumbnails")
     thumbnails = []
     for d in data:
         t = ChannelThumbnail(
@@ -602,4 +643,5 @@ def payload(data: Dict) -> Payload:
 def create(data: Dict):
     logging.info("create")
     p = payload(data)
+    print(p)
     p.save()
