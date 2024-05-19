@@ -35,27 +35,6 @@ class FormatSortField(BaseModel):
     field = p.TextField(unique=True)
 
 
-class Caption(BaseModel):
-    ext = p.TextField()
-    protocol = p.TextField()
-    url = p.TextField()
-
-
-class AutomaticCaptions(BaseModel):
-    language = p.CharField(max_length=2)
-    caption = p.ForeignKeyField(Caption)
-
-
-class Category(BaseModel):
-    category = p.TextField(unique=True)
-
-
-class Chapter(BaseModel):
-    start_time = p.DoubleField()
-    end_time = p.DoubleField()
-    title = p.TextField()
-
-
 class Fragment(BaseModel):
     duration = p.DoubleField()
     url = p.TextField()
@@ -78,9 +57,7 @@ class Format(BaseModel):
     format_id = p.TextField(unique=True)
     format_note = p.TextField()
     fps = p.DoubleField()
-    fragments = p.ForeignKeyField(Fragment)
     height = p.IntegerField()
-    http_headers = p.ForeignKeyField(HttpHeader)
     protocol = p.TextField()
     resolution = p.TextField()
     tbr = p.DoubleField(null=True)
@@ -91,7 +68,11 @@ class Format(BaseModel):
     width = p.IntegerField()
 
 
-class Tag(BaseModel):
+class ChannelTag(BaseModel):
+    tag = p.TextField(unique=True)
+
+
+class VideoTag(BaseModel):
     tag = p.TextField(unique=True)
 
 
@@ -142,85 +123,6 @@ class VideoThumbnail(BaseModel):
     url = p.TextField()
 
 
-class Entry(BaseModel):
-    last_playlist_index = p.IntegerField()
-    format_sort_field = p.ForeignKeyField(FormatSortField)
-    has_drm = p.BooleanField(null=True)
-    abr = p.DoubleField()
-    acodec = p.TextField()
-    age_limit = p.IntegerField(null=True)
-    aspect_ratio = p.DoubleField()
-    asr = p.IntegerField()
-    audio_channels = p.IntegerField()
-    automatic_captions = p.ForeignKeyField(AutomaticCaptions)
-    availability = p.TextField()
-    average_rating = p.DoubleField(null=True)
-    categories = p.ForeignKeyField(Category)
-    channel = p.TextField()
-    channel_follower_count = p.IntegerField()
-    channel_id = p.TextField()
-    channel_url = p.TextField()
-    chapters = p.ForeignKeyField(Chapter)
-    comment_count = p.IntegerField()
-    description = p.TextField()
-    display_id = p.TextField()
-    duration = p.IntegerField()
-    duration_string = p.TextField()
-    dynamic_range = p.TextField()
-    epoch = p.DateTimeField()
-    ext = p.TextField()
-    extractor = p.TextField()
-    extractor_key = p.TextField()
-    filesize = p.IntegerField()
-    format = p.TextField()
-    format_id = p.TextField()
-    format_note = p.TextField()
-    formats = p.ForeignKeyField(Format)
-    fps = p.IntegerField()
-    fulltitle = p.TextField(unique=True)
-    heatmap = p.ForeignKeyField(Heatmap)
-    height = p.IntegerField()
-    entry_id = p.TextField(unique=True)
-    is_live = p.BooleanField()
-    language = p.TextField(null=True)
-    like_count = p.IntegerField()
-    live_status = p.TextField()
-    n_entries = p.IntegerField()
-    original_url = p.TextField()
-    playable_in_embed = p.BooleanField()
-    playlist = p.TextField()
-    playlist_auto_number = p.IntegerField()
-    playlist_count = p.IntegerField()
-    playlist_id = p.TextField()
-    playlist_index = p.IntegerField()
-    playlist_title = p.TextField()
-    playlist_uploader = p.TextField()
-    playlist_uploader_id = p.TextField()
-    protocol = p.TextField()
-    release_timestamp = p.DateTimeField(null=True)
-    release_year = p.IntegerField(null=True)
-    requested_download = p.ForeignKeyField(RequestedDownload)
-    requested_formats = p.ForeignKeyField(Format)
-    resolution = p.TextField()
-    stretched_ratio = p.DoubleField(null=True)
-    subtitles = p.ForeignKeyField(SubtitleType)
-    tags = p.ForeignKeyField(Tag)
-    tbr = p.DoubleField()
-    thumbnail = p.TextField()
-    thumbnails = p.ForeignKeyField(VideoThumbnail)
-    title = p.TextField()
-    uploader_date = p.DateTimeField()
-    uploader_id = p.TextField()
-    uploader_url = p.TextField()
-    vbr = p.DoubleField()
-    vcodec = p.TextField()
-    view_count = p.IntegerField()
-    webpage_url = p.TextField()
-    webpage_url_basename = p.TextField()
-    webpage_url_domain = p.TextField()
-    width = p.IntegerField()
-
-
 class Payload(BaseModel):
     type_of = p.TextField()
     availability = p.BooleanField(null=True)
@@ -244,7 +146,104 @@ class Payload(BaseModel):
     view_count = p.IntegerField(null=True)
     webpage_url = p.TextField()
     webpage_url_basename = p.TextField()
-    webpage_url_host = p.TextField()
+    webpage_url_host = p.TextField(null=True)
+
+
+class Entry(BaseModel):
+    last_playlist_index = p.IntegerField()
+    has_drm = p.BooleanField(null=True)
+    abr = p.DoubleField()
+    acodec = p.TextField()
+    age_limit = p.IntegerField(null=True)
+    aspect_ratio = p.DoubleField()
+    asr = p.IntegerField()
+    audio_channels = p.IntegerField()
+    availability = p.TextField()
+    average_rating = p.DoubleField(null=True)
+    channel = p.TextField()
+    channel_follower_count = p.IntegerField()
+    channel_id = p.TextField()
+    channel_url = p.TextField()
+    comment_count = p.IntegerField()
+    description = p.TextField()
+    display_id = p.TextField()
+    duration = p.IntegerField()
+    duration_string = p.TextField()
+    dynamic_range = p.TextField()
+    epoch = p.DateTimeField()
+    ext = p.TextField()
+    extractor = p.TextField()
+    extractor_key = p.TextField()
+    filesize = p.IntegerField(null=True)
+    format = p.TextField(null=True)
+    format_id = p.TextField(null=True)
+    format_note = p.TextField(null=True)
+    fps = p.IntegerField()
+    fulltitle = p.TextField(unique=True)
+    height = p.IntegerField(null=True)
+    entry_id = p.TextField(unique=True)
+    is_live = p.BooleanField()
+    language = p.TextField(null=True)
+    like_count = p.IntegerField()
+    live_status = p.TextField()
+    n_entries = p.IntegerField()
+    original_url = p.TextField()
+    playable_in_embed = p.BooleanField()
+    playlist = p.TextField()
+    playlist_auto_number = p.IntegerField(null=True)
+    playlist_count = p.IntegerField()
+    playlist_id = p.TextField()
+    playlist_index = p.IntegerField()
+    playlist_title = p.TextField()
+    playlist_uploader = p.TextField()
+    playlist_uploader_id = p.TextField()
+    protocol = p.TextField()
+    release_timestamp = p.DateTimeField(null=True)
+    release_year = p.IntegerField(null=True)
+    resolution = p.TextField()
+    stretched_ratio = p.DoubleField(null=True)
+    tbr = p.DoubleField()
+    thumbnail = p.TextField()
+    title = p.TextField()
+    uploader_date = p.DateTimeField(null=True)
+    uploader_id = p.TextField()
+    uploader_url = p.TextField()
+    vbr = p.DoubleField()
+    vcodec = p.TextField(null=True)
+    view_count = p.IntegerField()
+    webpage_url = p.TextField()
+    webpage_url_basename = p.TextField()
+    webpage_url_domain = p.TextField()
+    width = p.IntegerField()
+
+
+class VideoCategory(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    category = p.TextField(unique=True)
+
+
+class ChannelCategory(BaseModel):
+    channel_id = p.ForeignKeyField(Payload)
+    category = p.TextField(unique=True)
+
+
+class AutomaticCaptions(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    language = p.CharField(max_length=2)
+
+
+class Caption(BaseModel):
+    auto_cap = p.ForeignKeyField(AutomaticCaptions)
+    ext = p.TextField()
+    protocol = p.TextField()
+    url = p.TextField()
+
+
+class Chapter(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    start_time = p.DoubleField()
+    end_time = p.DoubleField()
+    title = p.TextField()
 
 
 class ChannelThumbnail(BaseModel):
@@ -262,12 +261,14 @@ tables = [
     FormatSortField,
     Caption,
     AutomaticCaptions,
-    Category,
+    ChannelCategory,
+    VideoCategory,
     Chapter,
     Fragment,
     HttpHeader,
     Format,
-    Tag,
+    ChannelTag,
+    VideoTag,
     Heatmap,
     RequestedDownload,
     Subtitle,
@@ -329,16 +330,16 @@ def http_headers(data: List[Dict]) -> List[HttpHeader]:
     return http_headers
 
 
-def formats(data: List[Dict]) -> List[Format]:
+def formats(video: Entry, data: List[Dict]):
     # If none
     if data is None:
         logging.info("formats is none")
-        return []
+        return
 
     logging.info(f"{len(data)} formats")
-    formats = []
     for d in data:
         f = Format(
+            video_id=video,
             abr=d.get("abr"),
             acodec=d.get("acodec"),
             aspect_ratio=d.get("aspect_ratio"),
@@ -350,9 +351,7 @@ def formats(data: List[Dict]) -> List[Format]:
             format_id=d.get("format_id"),
             format_note=d.get("format_note"),
             fps=d.get("fps"),
-            fragments=fragments(d.get("fragments")),
             height=d.get("height"),
-            http_headers=http_headers(d.get("http_headers")),
             protocol=d.get("protocol"),
             resolution=d.get("resolution"),
             tbr=d.get("tbr"),
@@ -362,10 +361,12 @@ def formats(data: List[Dict]) -> List[Format]:
             video_ext=d.get("video_ext"),
             width=d.get("width"),
         )
-        formats.append(f)
 
-    logging.debug(formats)
-    return formats
+        # Fragment
+        fragments(f, d.get("fragments"))
+
+        # Http Headers
+        http_headers(f, d.get("http_headers"))
 
 
 def heatmaps(data: List[Dict]) -> List[Heatmap]:
@@ -466,14 +467,89 @@ def subtitle_type(data: Dict) -> List[SubtitleType]:
     return subtitles
 
 
-def entries(channel_id: Payload, data: List[Dict]) -> List[Entry]:
+def format_sort_field(video: Entry, data: List[str]):
+    # If none
+    if data is None:
+        logging.info("format_sort_field is none")
+        return
+
+    logging.info(f"{len(data)} format_sort_field")
+    for d in data:
+        FormatSortField.create(video_id=video, field=d)
+
+
+def caption(video, Entry, auto_captions: AutomaticCaptions, data: Dict):
+    # If none
+    if data is None:
+        logging.info("caption is none")
+        return
+
+    logging.info(f"{len(data)} captions")
+    for d in data.keys():
+        Caption.create(
+            video_id=video,
+            auto_cap=auto_captions,
+            ext=d.get("ext"),
+            protocol=d.get("protocol"),
+            url=d.get("url"),
+        )
+
+
+def automatic_captions(video: Entry, data: Dict):
+    # If none
+    if data is None:
+        logging.info("automatic_captions is none")
+        return
+
+    logging.info(f"{len(data)} automatic_captions")
+    for d in data.keys():
+        ac = AutomaticCaptions.create(video_id=video, language=d)
+
+        # Captions
+        caption(video, ac, data.get(d))
+
+
+def video_categories(video: Entry, data: List[str]):
+    # If none
+    if data is None:
+        logging.info("video_categories is none")
+        return
+
+    logging.info(f"{len(data)} video categories")
+    for d in data:
+        VideoCategory.create(video_id=video, category=d)
+
+
+def chapters(video: Entry, data: List[Dict]):
+    # If none
+    if data is None:
+        logging.info("chapters is none")
+        return
+
+    logging.info(f"{len(data)} chapters")
+    for d in data:
+        c = Chapter.create(
+            video_id=video,
+            start_time=d.get("start_time"),
+            end_time=d.get("end_time"),
+            title=d.get("title"),
+        )
+
+        # Fragments
+        fragments(c, d.get("fragments"))
+
+
+def entries(data: List[Dict]):
     logging.info(f"{len(data)} entries")
-    entries = []
+
+    # Log keys
+    for key in data[0].keys():
+        logging.info(f"Key: {key}, Type: {type(data[0].get(key))}")
+
     for d in data:
         logging.info(f"Video: {d.get('title')}")
-        e = Entry(
+        e = Entry.create(
             last_playlist_index=d.get("__last_playlist_index"),
-            format_sort_field=d.get("format_sort_field"),
             has_drm=d.get("has_drm"),
             abr=d.get("abr"),
             acodec=d.get("acodec"),
@@ -481,10 +557,8 @@ def entries(channel_id: Payload, data: List[Dict]) -> List[Entry]:
             aspect_ratio=d.get("aspect_ratio"),
             asr=d.get("asr"),
             audio_channels=d.get("audio_channels"),
-            automatic_captions=d.get("automatic_captions"),
             availability=d.get("availability"),
             average_rating=d.get("average_rating"),
-            categories=d.get("categories"),
             channel=d.get("channel"),
             channel_follower_count=d.get("channel_follower_count"),
             channel_id=d.get("channel_id"),
@@ -501,10 +575,8 @@ def entries(channel_id: Payload, data: List[Dict]) -> List[Entry]:
             extractor=d.get("extractor"),
             extractor_key=d.get("extractor_key"),
             filesize=d.get("filesize"),
-            format=format(d.get("formats")),
             fps=d.get("fps"),
             fulltitle=d.get("fulltitle"),
-            heatmap=heatmaps(d.get("heatmap")),
             entry_id=d.get("id"),
             is_live=d.get("is_live"),
             language=d.get("language"),
@@ -524,16 +596,11 @@ def entries(channel_id: Payload, data: List[Dict]) -> List[Entry]:
             protocol=d.get("protocol"),
             release_timestamp=d.get("release_timestamp"),
             release_year=d.get("release_year"),
-            requested_download=requested_download(d.get("requested_download")),
-            requested_formats=format(d.get("requested_formats")),
             requested_subtitles=d.get("requested_subtitles"),
             resolution=d.get("resolution"),
             stretched_ratio=d.get("stretched_ratio"),
-            subtitles=subtitle_type(d.get("subtitles")),
-            tags=tags(d.get("tags")),
             tbr=d.get("tbr"),
             thumbnail=d.get("thumbnail"),
-            thumbnails=video_thumbnails(d.get("thumbnails")),
             title=d.get("title"),
             uploader_date=d.get("uploader_date"),
             uploader_id=d.get("uploader_id"),
@@ -548,58 +615,92 @@ def entries(channel_id: Payload, data: List[Dict]) -> List[Entry]:
             width=d.get("width"),
         )
 
-        entries.append(e)
+        # Format
+        formats(e, d.get("formats"))
+
+        # Heatmaps
+        heatmaps(e, d.get("heatmaps"))
+
+        # Requested Downloads
+        requested_download(e, d.get("requested_download"))
+
+        # Requested Formats
+        formats(e, d.get("requested_formats"))
+
+        # Subtitles
+        subtitle(e, d.get("subtitles"))
+
+        # Video Thumbnails
+        video_thumbnails(e, d.get("thumbnails"))
+
+        # Tags
+        video_tags(e, d.get("tags"))
+
+        # Format Sort Field
+        format_sort_field(e, d.get("format_sort_field"))
+
+        # Automatic Captions
+        automatic_captions(e, d.get("automatic_captions"))
+
+        # Video Categories
+        video_categories(e, d.get("categories"))
+
+        # Chapters
+        chapters(e, d.get("chapters"))
 
     logging.debug(entries)
     return entries
 
 
-def tags(data: List[str]) -> List[Tag]:
+def video_tags(p: Entry, data: List[str]):
     # If none
     if data is None:
         logging.info("tags is none")
-        return []
+        return
 
     logging.info(f"{len(data)} tags")
-    tags = []
     for d in data:
-        t = Tag(tag=d)
-        tags.append(t)
-
-    logging.debug(tags)
-    return tags
+        VideoTag.create(video_id=p, tag=d)
 
 
-def video_thumbnails(data: List[Dict]) -> List[VideoThumbnail]:
+def channel_tags(p: Payload, data: List[str]):
+    # If none
+    if data is None:
+        logging.info("tags is none")
+        return
+
+    logging.info(f"{len(data)} tags")
+    for d in data:
+        ChannelTag.create(channel_id=p, tag=d)
+
+
+def video_thumbnails(v: Entry, data: List[Dict]):
     # If none
     if data is None:
         logging.info("video_thumbnails is none")
-        return []
+        return
 
     logging.info(f"{len(data)} video thumbnails")
-    thumbnails = []
+
     for d in data:
-        t = VideoThumbnail(
+        VideoThumbnail.create(
+            video_id=v,
             thumbnail_id=d.get("thumbnail_id"),
             preference=d.get("preference"),
             url=d.get("url"),
         )
-        thumbnails.append(t)
-
-    logging.debug(thumbnails)
-    return thumbnails
 
 
-def channel_thumbnails(channel: Payload, data: List[Dict]) -> List[ChannelThumbnail]:
+def channel_thumbnails(channel: Payload, data: List[Dict]):
     # If none
     if data is None:
         logging.info("channel_thumbnails is none")
-        return []
+        return
 
     logging.info(f"{len(data)} channel thumbnails")
-    thumbnails = []
     for d in data:
-        t = ChannelThumbnail(
+        ChannelThumbnail.create(
+            channel_id=channel,
             thumbnail_id=d.get("thumbnail_id"),
             preference=d.get("preference"),
             resolution=d.get("resolution"),
@@ -607,10 +708,6 @@ def channel_thumbnails(channel: Payload, data: List[Dict]) -> List[ChannelThumbn
             width=d.get("width"),
             height=d.get("height"),
         )
-        thumbnails.append(t)
-
-    logging.debug(thumbnails)
-    return thumbnails
 
 
 def payload(data: Dict) -> Payload:
@@ -645,13 +742,13 @@ def payload(data: Dict) -> Payload:
     logging.debug(p)
 
     # Initialize entries
-    entries(p, data.get("entries"))
+    entries(data.get("entries"))
 
     # Initialize version
     version(p, data.get("_version"))
 
     # Initialize tags
-    tags(p, data.get("tags"))
+    channel_tags(p, data.get("tags"))
 
     # Initialize Channel Thumbnails
     channel_thumbnails(p, data.get("thumbnails"))
