@@ -1,11 +1,19 @@
+import atexit
 import logging
 import json
 
 import peewee as p
-import datetime
+
+db: p.SqliteDatabase = p.SqliteDatabase("yt.db")
+db.connect()
 
 
-db = p.SqliteDatabase("yt.db")
+def close_db():
+    logging.info("close_db")
+    db.close()
+
+
+atexit.register(close_db)
 
 
 def load_json():
@@ -24,16 +32,11 @@ class BaseModel(p.Model):
         database = db
 
 
-class User(BaseModel):
+class Payload(BaseModel):
     username = p.CharField(unique=True)
 
 
-class Tweet(BaseModel):
-    user = p.ForeignKeyField(User, backref="tweets")
-    message = p.TextField()
-    created_date = p.DateTimeField(default=datetime.datetime.now)
-    is_published = p.BooleanField(default=True)
-
+db.create_tables([Payload])
 
 # Enable timestamp and log level in log messages
 logging.basicConfig(
