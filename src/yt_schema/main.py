@@ -47,6 +47,62 @@ class FormatSortField(BaseModel):
     field = p.TextField(unique=True)
 
 
+class Caption(BaseModel):
+    ext = p.TextField()
+    protocol = p.TextField()
+    url = p.TextField()
+
+
+class AutomaticCaptions(BaseModel):
+    language = p.CharField(max_length=2)
+    caption = p.ForeignKeyField(Caption)
+
+
+class Category(BaseModel):
+    category = p.TextField(unique=True)
+
+
+class Chapter(BaseModel):
+    start_time = p.DoubleField()
+    end_time = p.DoubleField()
+    title = p.TextField()
+
+
+class Fragment(BaseModel):
+    duration = p.DoubleField()
+    url = p.TextField()
+
+
+class HttpHeader(BaseModel):
+    key = p.TextField()
+    value = p.TextField()
+
+
+class Format(BaseModel):
+    abr = p.DoubleField()
+    acodec = p.TextField()
+    aspect_ratio = p.DoubleField()
+    audio_ext = p.TextField()
+    columns = p.IntegerField()
+    ext = p.TextField()
+    filesize_approx = p.IntegerField(null=True)
+    format = p.TextField()
+    format_id = p.TextField(unique=True)
+    format_note = p.TextField()
+    fps = p.DoubleField()
+    fragments = p.ForeignKeyField(Fragment)
+    height = p.IntegerField()
+    http_headers = p.ForeignKeyField(HttpHeader)
+    protocol = p.TextField()
+    resolution = p.TextField()
+    tbr = p.DoubleField(null=True)
+    url = p.TextField()
+    vbr = p.IntegerField()
+    vcodec = p.TextField()
+    video_ext = p.TextField()
+    width = p.IntegerField()
+
+
 class Entry(BaseModel):
     last_playlist_index = p.IntegerField()
     format_sort_field = p.ForeignKeyField(FormatSortField)
@@ -57,6 +113,29 @@ class Entry(BaseModel):
     aspect_ratio = p.DoubleField()
     asr = p.IntegerField()
     audio_channels = p.IntegerField()
+    automatic_captions = p.ForeignKeyField(AutomaticCaptions)
+    availability = p.TextField()
+    average_rating = p.DoubleField(null=True)
+    categories = p.ForeignKeyField(Category)
+    channel = p.TextField()
+    channel_follower_count = p.IntegerField()
+    channel_id = p.TextField()
+    channel_url = p.TextField()
+    chapters = p.ForeignKeyField(Chapter)
+    comment_count = p.IntegerField()
+    description = p.TextField()
+    display_id = p.TextField()
+    duration = p.IntegerField()
+    duration_string = p.TextField()
+    dynamic_range = p.TextField()
+    epoch = p.DateTimeField()
+    ext = p.TextField()
+    extractor = p.TextField()
+    extractor_key = p.TextField()
+    filesize = p.IntegerField()
+    format = p.TextField()
+    format_id = p.TextField()
+    format_note = p.TextField()
 
 
 class Tags(BaseModel):
