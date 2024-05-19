@@ -411,27 +411,32 @@ def requested_download(data: List[Dict]) -> List[RequestedDownload]:
     return requested_downloads
 
 
-def subtitles(data: Dict[str, Dict]) -> List[Subtitle]:
+def subtitle(data: List[Dict]) -> List[Subtitle]:
     logging.info(f"{len(data)} subtitles")
     subtitles = []
-    for d in data.keys():
+    for sub in data:
+        print(sub)
         s = Subtitle(
-            ext=d.get("ext"),
-            name=d.get("name"),
-            url=d.get("url"),
+            ext=sub.get("ext"),
+            name=sub.get("name"),
+            url=sub.get("url"),
         )
         subtitles.append(s)
 
     return subtitles
 
 
-def subtitle(data: Dict) -> SubtitleType:
-    logging.info("subtitle_type")
+def subtitle_type(data: Dict) -> List[SubtitleType]:
+    logging.info(f"{len(data)} subtitles")
+    subtitles = []
+    for sub in data.keys():
+        s = SubtitleType(
+            language=sub,
+            subtitles=subtitle(data.get(sub)),
+        )
+        subtitles.append(s)
 
-    return SubtitleType(
-        language=data.get("language"),
-        subtitles=subtitles(data),
-    )
+    return subtitles
 
 
 def entries(data: List[Dict]) -> List[Entry]:
@@ -496,7 +501,7 @@ def entries(data: List[Dict]) -> List[Entry]:
             requested_subtitles=d.get("requested_subtitles"),
             resolution=d.get("resolution"),
             stretched_ratio=d.get("stretched_ratio"),
-            subtitles=subtitles(d.get("subtitles")),
+            subtitles=subtitle_type(d.get("subtitles")),
             tags=tags(d.get("tags")),
             tbr=d.get("tbr"),
             thumbnail=d.get("thumbnail"),
