@@ -24,13 +24,6 @@ class BaseModel(p.Model):
         database = db
 
 
-class Version(BaseModel):
-    current_git_head = p.TextField(null=True)
-    release_git_head = p.TextField(unique=True)
-    repository = p.TextField()
-    version = p.TextField()
-
-
 class FormatSortField(BaseModel):
     field = p.TextField(unique=True)
 
@@ -261,6 +254,14 @@ class ChannelTag(BaseModel):
     tag = p.TextField(unique=True)
 
 
+class Version(BaseModel):
+    channel_id = p.ForeignKeyField(Payload)
+    current_git_head = p.TextField(null=True)
+    release_git_head = p.TextField(unique=True)
+    repository = p.TextField()
+    version = p.TextField()
+
+
 tables = [
     Version,
     FormatSortField,
@@ -289,17 +290,15 @@ db.drop_tables(tables, safe=True)
 db.create_tables(tables)
 
 
-def version(data: Dict) -> Version:
+def version(channel: Payload, data: Dict):
     logging.info("version")
-    v = Version(
+    Version.create(
+        channel_id=channel,
         current_git_head=data.get("current_git_head"),
         release_git_head=data.get("release_git_head"),
         repository=data.get("repository"),
         version=data.get("version"),
     )
-
-    logging.debug(v)
-    return v
 
 
 def fragments(video: Entry, data: List[Dict]):
@@ -378,14 +377,12 @@ def heatmaps(video: Entry, data: List[Dict]):
 
     logging.info(f"{len(data)} heatmaps")
     for d in data:
-        h = Heatmap.create(
+        Heatmap.create(
             video_id=video,
             end_time=d.get("end_time"),
             start_time=d.get("start_time"),
             value=d.get("value"),
         )
-
-        logging.debug(h)
 
 
 def requested_download(video: Entry, data: List[Dict]):
