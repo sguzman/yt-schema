@@ -63,10 +63,6 @@ class Format(BaseModel):
     width = p.IntegerField(null=True)
 
 
-class ChannelTag(BaseModel):
-    tag = p.TextField(unique=True)
-
-
 class RequestedDownload(BaseModel):
     write_download_archive = p.BooleanField()
     filename = p.TextField()
@@ -260,6 +256,11 @@ class VideoTag(BaseModel):
     tag = p.TextField()
 
 
+class ChannelTag(BaseModel):
+    channel_id = p.ForeignKeyField(Payload)
+    tag = p.TextField(unique=True)
+
+
 tables = [
     Version,
     FormatSortField,
@@ -304,7 +305,6 @@ def version(data: Dict) -> Version:
 def fragments(video: Entry, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("http_headers is none")
         return
 
     logging.info(f"{len(data)} fragments")
@@ -320,7 +320,6 @@ def fragments(video: Entry, data: List[Dict]):
 def http_headers(video: Entry, data: Dict):
     # If none
     if data is None:
-        logging.info("http_headers is none")
         return
 
     logging.info(f"{len(data)} http_headers")
@@ -337,7 +336,6 @@ def http_headers(video: Entry, data: Dict):
 def formats(video: Entry, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("formats is none")
         return
 
     logging.info(f"{len(data)} formats")
@@ -376,7 +374,6 @@ def formats(video: Entry, data: List[Dict]):
 def heatmaps(video: Entry, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("heatmaps is none")
         return
 
     logging.info(f"{len(data)} heatmaps")
@@ -394,7 +391,6 @@ def heatmaps(video: Entry, data: List[Dict]):
 def requested_download(video: Entry, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("requested_download is none")
         return
 
     logging.info(f"{len(data)} requested_download")
@@ -430,7 +426,6 @@ def requested_download(video: Entry, data: List[Dict]):
 def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("subtitle is none")
         return
 
     logging.info(f"{len(data)} subtitles")
@@ -448,7 +443,6 @@ def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
 def subtitle_type(video: Entry, data: Dict):
     # If none
     if data is None:
-        logging.info("subtitle_type is none")
         return []
 
     logging.info(f"{len(data)} subtitles")
@@ -465,7 +459,6 @@ def subtitle_type(video: Entry, data: Dict):
 def format_sort_field(video: Entry, data: List[str]):
     # If none
     if data is None:
-        logging.info("format_sort_field is none")
         return
 
     logging.info(f"{len(data)} format_sort_field")
@@ -476,7 +469,6 @@ def format_sort_field(video: Entry, data: List[str]):
 def caption(video: Entry, auto_captions: AutomaticCaptions, data: Dict):
     # If none
     if data is None:
-        logging.info("caption is none")
         return
 
     logging.info(f"{len(data)} captions")
@@ -493,7 +485,6 @@ def caption(video: Entry, auto_captions: AutomaticCaptions, data: Dict):
 def automatic_captions(video: Entry, data: Dict):
     # If none
     if data is None:
-        logging.info("automatic_captions is none")
         return
 
     logging.info(f"{len(data)} automatic_captions")
@@ -507,7 +498,6 @@ def automatic_captions(video: Entry, data: Dict):
 def video_categories(video: Entry, data: List[str]):
     # If none
     if data is None:
-        logging.info("video_categories is none")
         return
 
     logging.info(f"{len(data)} video categories")
@@ -518,7 +508,6 @@ def video_categories(video: Entry, data: List[str]):
 def chapters(video: Entry, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("chapters is none")
         return
 
     logging.info(f"{len(data)} chapters")
@@ -536,10 +525,6 @@ def chapters(video: Entry, data: List[Dict]):
 
 def entries(data: List[Dict]):
     logging.info(f"{len(data)} entries")
-
-    # Log keys
-    for key in data[0].keys():
-        logging.info(f"Key: {key}, Type: {type(data[0].get(key))}")
 
     for d in data:
         logging.info(f"Video: {d.get('title')}")
@@ -650,7 +635,6 @@ def entries(data: List[Dict]):
 def video_tags(p: Entry, data: List[str]):
     # If none
     if data is None:
-        logging.info("tags is none")
         return
 
     logging.info(f"{len(data)} tags")
@@ -661,7 +645,6 @@ def video_tags(p: Entry, data: List[str]):
 def channel_tags(p: Payload, data: List[str]):
     # If none
     if data is None:
-        logging.info("tags is none")
         return
 
     logging.info(f"{len(data)} tags")
@@ -672,7 +655,6 @@ def channel_tags(p: Payload, data: List[str]):
 def video_thumbnails(v: Entry, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("video_thumbnails is none")
         return
 
     logging.info(f"{len(data)} video thumbnails")
@@ -689,7 +671,6 @@ def video_thumbnails(v: Entry, data: List[Dict]):
 def channel_thumbnails(channel: Payload, data: List[Dict]):
     # If none
     if data is None:
-        logging.info("channel_thumbnails is none")
         return
 
     logging.info(f"{len(data)} channel thumbnails")
