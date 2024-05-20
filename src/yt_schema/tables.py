@@ -596,7 +596,7 @@ def entries(data: List[Dict]):
         formats(e, d.get("formats"))
 
         # Heatmaps
-        heatmaps(e, d.get("heatmaps"))
+        heatmaps(e, d.get("heatmap"))
 
         # Requested Downloads
         requested_download(e, d.get("requested_download"))
