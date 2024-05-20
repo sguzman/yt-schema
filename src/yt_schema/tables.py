@@ -428,7 +428,7 @@ def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
     logging.info(f"{len(data)} subtitles")
 
     for sub in data:
-        s = Subtitle(
+        Subtitle.create(
             video_id=video,
             subtitle_type=s,
             ext=sub.get("ext"),
