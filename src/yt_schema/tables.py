@@ -35,37 +35,32 @@ class FormatSortField(BaseModel):
     field = p.TextField(unique=True)
 
 
-class Fragment(BaseModel):
-    duration = p.DoubleField()
-    url = p.TextField()
-
-
 class HttpHeader(BaseModel):
     key = p.TextField()
     value = p.TextField()
 
 
 class Format(BaseModel):
-    abr = p.DoubleField()
-    acodec = p.TextField()
-    aspect_ratio = p.DoubleField()
+    abr = p.DoubleField(null=True)
+    acodec = p.TextField(null=True)
+    aspect_ratio = p.DoubleField(null=True)
     audio_ext = p.TextField()
-    columns = p.IntegerField()
+    columns = p.IntegerField(null=True)
     ext = p.TextField()
     filesize_approx = p.IntegerField(null=True)
     format = p.TextField()
     format_id = p.TextField(unique=True)
     format_note = p.TextField()
-    fps = p.DoubleField()
-    height = p.IntegerField()
+    fps = p.DoubleField(null=True)
+    height = p.IntegerField(null=True)
     protocol = p.TextField()
     resolution = p.TextField()
     tbr = p.DoubleField(null=True)
     url = p.TextField()
-    vbr = p.IntegerField()
+    vbr = p.IntegerField(null=True)
     vcodec = p.TextField()
     video_ext = p.TextField()
-    width = p.IntegerField()
+    width = p.IntegerField(null=True)
 
 
 class ChannelTag(BaseModel):
@@ -74,12 +69,6 @@ class ChannelTag(BaseModel):
 
 class VideoTag(BaseModel):
     tag = p.TextField(unique=True)
-
-
-class Heatmap(BaseModel):
-    end_time = p.DoubleField()
-    start_time = p.DoubleField()
-    value = p.DoubleField()
 
 
 class RequestedDownload(BaseModel):
@@ -98,7 +87,6 @@ class RequestedDownload(BaseModel):
     fps = p.DoubleField()
     height = p.IntegerField()
     protocol = p.TextField()
-    requested_format = p.ForeignKeyField(Format)
     resolution = p.TextField()
     tbr = p.DoubleField()
     vbr = p.DoubleField()
@@ -106,19 +94,8 @@ class RequestedDownload(BaseModel):
     width = p.IntegerField()
 
 
-class Subtitle(BaseModel):
-    ext = p.TextField()
-    name = p.TextField()
-    url = p.TextField()
-
-
-class SubtitleType(BaseModel):
-    language = p.TextField()
-    subtitles = p.ForeignKeyField(Subtitle)
-
-
 class VideoThumbnail(BaseModel):
-    thumbnail_id = p.TextField(unique=True)
+    thumbnail_id = p.TextField(null=True)
     preference = p.IntegerField(null=True)
     url = p.TextField()
 
@@ -217,6 +194,19 @@ class Entry(BaseModel):
     width = p.IntegerField()
 
 
+class SubtitleType(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    language = p.TextField()
+
+
+class Subtitle(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    subtitle_type = p.ForeignKeyField(SubtitleType)
+    ext = p.TextField()
+    name = p.TextField()
+    url = p.TextField()
+
+
 class VideoCategory(BaseModel):
     video_id = p.ForeignKeyField(Entry)
     category = p.TextField(unique=True)
@@ -254,6 +244,19 @@ class ChannelThumbnail(BaseModel):
     url = p.TextField()
     width = p.IntegerField(null=True)
     height = p.IntegerField(null=True)
+
+
+class Fragment(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    duration = p.DoubleField()
+    url = p.TextField()
+
+
+class Heatmap(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    end_time = p.DoubleField()
+    start_time = p.DoubleField()
+    value = p.DoubleField()
 
 
 tables = [
@@ -297,37 +300,37 @@ def version(data: Dict) -> Version:
     return v
 
 
-def fragments(data: List[Dict]) -> List[Fragment]:
-    logging.info(f"{len(data)} fragments")
-    fragments = []
-    for d in data:
-        f = Fragment(
-            duration=d.get("duration"),
-            url=d.get("url"),
-        )
-        fragments.append(f)
-
-    logging.debug(fragments)
-    return fragments
-
-
-def http_headers(data: List[Dict]) -> List[HttpHeader]:
+def fragments(video: Entry, data: List[Dict]):
     # If none
     if data is None:
         logging.info("http_headers is none")
-        return []
+        return
+
+    logging.info(f"{len(data)} fragments")
+
+    for d in data:
+        Fragment.create(
+            video_id=video,
+            duration=d.get("duration"),
+            url=d.get("url"),
+        )
+
+
+def http_headers(video: Entry, data: Dict):
+    # If none
+    if data is None:
+        logging.info("http_headers is none")
+        return
 
     logging.info(f"{len(data)} http_headers")
-    http_headers = []
-    for d in data:
-        h = HttpHeader(
-            key=d.get("key"),
-            value=d.get("value"),
+    for d in data.keys():
+        key = d
+        value = data.get(d)
+        HttpHeader.create(
+            video_id=video,
+            key=key,
+            value=value,
         )
-        http_headers.append(h)
-
-    logging.debug(http_headers)
-    return http_headers
 
 
 def formats(video: Entry, data: List[Dict]):
@@ -338,7 +341,7 @@ def formats(video: Entry, data: List[Dict]):
 
     logging.info(f"{len(data)} formats")
     for d in data:
-        f = Format(
+        Format.create(
             video_id=video,
             abr=d.get("abr"),
             acodec=d.get("acodec"),
@@ -363,43 +366,40 @@ def formats(video: Entry, data: List[Dict]):
         )
 
         # Fragment
-        fragments(f, d.get("fragments"))
+        fragments(video, d.get("fragments"))
 
         # Http Headers
-        http_headers(f, d.get("http_headers"))
+        http_headers(video, d.get("http_headers"))
 
 
-def heatmaps(data: List[Dict]) -> List[Heatmap]:
+def heatmaps(video: Entry, data: List[Dict]):
     # If none
     if data is None:
         logging.info("heatmaps is none")
-        return []
+        return
 
     logging.info(f"{len(data)} heatmaps")
-    heatmaps = []
     for d in data:
-        h = Heatmap(
+        h = Heatmap.create(
+            video_id=video,
             end_time=d.get("end_time"),
             start_time=d.get("start_time"),
             value=d.get("value"),
         )
-        h.save()
-        heatmaps.append(h)
 
-    logging.debug(heatmaps)
-    return heatmaps
+        logging.debug(h)
 
 
-def requested_download(data: List[Dict]) -> List[RequestedDownload]:
+def requested_download(video: Entry, data: List[Dict]):
     # If none
     if data is None:
         logging.info("requested_download is none")
-        return []
+        return
 
     logging.info(f"{len(data)} requested_download")
-    requested_downloads = []
+
     for d in data:
-        rd = RequestedDownload(
+        RequestedDownload.create(
             write_download_archive=d.get("write_download_archive"),
             filename=d.get("filename"),
             abr=d.get("abr"),
@@ -415,56 +415,50 @@ def requested_download(data: List[Dict]) -> List[RequestedDownload]:
             fps=d.get("fps"),
             height=d.get("height"),
             protocol=d.get("protocol"),
-            requested_format=format(d.get("requested_format")),
             resolution=d.get("resolution"),
             tbr=d.get("tbr"),
             vbr=d.get("vbr"),
             vcodec=d.get("vcodec"),
             width=d.get("width"),
         )
-        requested_downloads.append(rd)
 
-    logging.debug(requested_downloads)
-    return requested_downloads
+        # Requested Formats
+        formats(video, d.get("requested_formats"))
 
 
-def subtitle(data: List[Dict]) -> List[Subtitle]:
+def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
     # If none
     if data is None:
         logging.info("subtitle is none")
-        return []
+        return
 
     logging.info(f"{len(data)} subtitles")
-    subtitles = []
+
     for sub in data:
         s = Subtitle(
+            video_id=video,
+            subtitle_type=s,
             ext=sub.get("ext"),
             name=sub.get("name"),
             url=sub.get("url"),
         )
-        subtitles.append(s)
-
-    logging.debug(subtitles)
-    return subtitles
 
 
-def subtitle_type(data: Dict) -> List[SubtitleType]:
+def subtitle_type(video: Entry, data: Dict):
     # If none
     if data is None:
         logging.info("subtitle_type is none")
         return []
 
     logging.info(f"{len(data)} subtitles")
-    subtitles = []
     for sub in data.keys():
-        s = SubtitleType(
+        s = SubtitleType.create(
+            video_id=video,
             language=sub,
-            subtitles=subtitle(data.get(sub)),
         )
-        subtitles.append(s)
 
-    logging.debug(subtitles)
-    return subtitles
+        # Subtitles
+        subtitles(video, s, data.get(sub))
 
 
 def format_sort_field(video: Entry, data: List[str]):
@@ -478,14 +472,14 @@ def format_sort_field(video: Entry, data: List[str]):
         FormatSortField.create(video_id=video, field=d)
 
 
-def caption(video, Entry, auto_captions: AutomaticCaptions, data: Dict):
+def caption(video: Entry, auto_captions: AutomaticCaptions, data: Dict):
     # If none
     if data is None:
         logging.info("caption is none")
         return
 
     logging.info(f"{len(data)} captions")
-    for d in data.keys():
+    for d in data:
         Caption.create(
             video_id=video,
             auto_cap=auto_captions,
@@ -528,7 +522,7 @@ def chapters(video: Entry, data: List[Dict]):
 
     logging.info(f"{len(data)} chapters")
     for d in data:
-        c = Chapter.create(
+        Chapter.create(
             video_id=video,
             start_time=d.get("start_time"),
             end_time=d.get("end_time"),
@@ -536,7 +530,7 @@ def chapters(video: Entry, data: List[Dict]):
         )
 
         # Fragments
-        fragments(c, d.get("fragments"))
+        fragments(video, d.get("fragments"))
 
 
 def entries(data: List[Dict]):
@@ -628,7 +622,7 @@ def entries(data: List[Dict]):
         formats(e, d.get("requested_formats"))
 
         # Subtitles
-        subtitle(e, d.get("subtitles"))
+        subtitle_type(e, d.get("subtitles"))
 
         # Video Thumbnails
         video_thumbnails(e, d.get("thumbnails"))
