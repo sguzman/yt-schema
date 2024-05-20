@@ -4,7 +4,7 @@ import peewee as p
 from typing import Dict, List
 
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 db: p.SqliteDatabase = p.SqliteDatabase("yt.db")
@@ -49,7 +49,7 @@ class Format(BaseModel):
     ext = p.TextField()
     filesize_approx = p.IntegerField(null=True)
     format = p.TextField()
-    format_id = p.TextField(unique=True)
+    format_id = p.TextField(null=True)
     format_note = p.TextField()
     fps = p.DoubleField(null=True)
     height = p.IntegerField(null=True)
@@ -64,10 +64,6 @@ class Format(BaseModel):
 
 
 class ChannelTag(BaseModel):
-    tag = p.TextField(unique=True)
-
-
-class VideoTag(BaseModel):
     tag = p.TextField(unique=True)
 
 
@@ -209,7 +205,7 @@ class Subtitle(BaseModel):
 
 class VideoCategory(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    category = p.TextField(unique=True)
+    category = p.TextField()
 
 
 class ChannelCategory(BaseModel):
@@ -225,7 +221,7 @@ class AutomaticCaptions(BaseModel):
 class Caption(BaseModel):
     auto_cap = p.ForeignKeyField(AutomaticCaptions)
     ext = p.TextField()
-    protocol = p.TextField()
+    protocol = p.TextField(null=True)
     url = p.TextField()
 
 
@@ -257,6 +253,11 @@ class Heatmap(BaseModel):
     end_time = p.DoubleField()
     start_time = p.DoubleField()
     value = p.DoubleField()
+
+
+class VideoTag(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    tag = p.TextField()
 
 
 tables = [
