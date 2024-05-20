@@ -223,7 +223,7 @@ class Chapter(BaseModel):
 
 class ChannelThumbnail(BaseModel):
     channel_id = p.ForeignKeyField(Payload)
-    thumbnail_id = p.TextField(unique=True)
+    thumbnail_id = p.TextField(null=True)
     preference = p.IntegerField(null=True)
     resolution = p.TextField(null=True)
     url = p.TextField()
@@ -712,7 +712,8 @@ def payload(data: Dict) -> Payload:
         webpage_url_host=data.get("webpage_url_host"),
     )
 
-    logging.debug(p)
+    # Initialize Channel Thumbnails
+    channel_thumbnails(p, data.get("thumbnails"))
 
     # Initialize entries
     entries(data.get("entries"))
@@ -722,9 +723,6 @@ def payload(data: Dict) -> Payload:
 
     # Initialize tags
     channel_tags(p, data.get("tags"))
-
-    # Initialize Channel Thumbnails
-    channel_thumbnails(p, data.get("thumbnails"))
 
     logging.debug(p)
     return p
