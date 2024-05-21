@@ -1,12 +1,13 @@
 import logging
+import os
 import json
 
 from yt_schema.tables import create
 
 
-def load_json():
-    logging.info("load_json")
-    return json.loads(open("resources/channel.json").read())
+def load_json(name: str):
+    logging.info(f"load_json {name}")
+    return json.loads(open(f"resources/{name}").read())
 
 
 # Enable timestamp and log level in log messages
@@ -17,8 +18,12 @@ logging.basicConfig(
 
 def main():
     logging.info("start")
-    js = load_json()
-    create(js)
+    # For each json file in the resources folder, create a table
+    for file in os.listdir("resources"):
+        if file.endswith("pretty.json"):
+            js = load_json(file)
+            logging.info(f"Creating table for {file}")
+            create(js)
     logging.info("end")
 
 

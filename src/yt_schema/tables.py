@@ -4,7 +4,7 @@ import peewee as p
 from typing import Dict, List
 
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
 )
 
 db: p.SqliteDatabase = p.SqliteDatabase("yt.db")
