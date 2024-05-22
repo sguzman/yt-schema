@@ -29,85 +29,85 @@ class FormatSortField(BaseModel):
 
 
 class HttpHeader(BaseModel):
-    key = p.TextField()
-    value = p.TextField()
+    key = p.TextField(null=True)
+    value = p.TextField(null=True)
 
 
 class Format(BaseModel):
     abr = p.DoubleField(null=True)
     acodec = p.TextField(null=True)
     aspect_ratio = p.DoubleField(null=True)
-    audio_ext = p.TextField()
+    audio_ext = p.TextField(null=True)
     columns = p.IntegerField(null=True)
-    ext = p.TextField()
+    ext = p.TextField(null=True)
     filesize_approx = p.IntegerField(null=True)
-    format = p.TextField()
+    format = p.TextField(null=True)
     format_id = p.TextField(null=True)
-    format_note = p.TextField()
+    format_note = p.TextField(null=True)
     fps = p.DoubleField(null=True)
     height = p.IntegerField(null=True)
-    protocol = p.TextField()
-    resolution = p.TextField()
+    protocol = p.TextField(null=True)
+    resolution = p.TextField(null=True)
     tbr = p.DoubleField(null=True)
-    url = p.TextField()
+    url = p.TextField(null=True)
     vbr = p.IntegerField(null=True)
-    vcodec = p.TextField()
-    video_ext = p.TextField()
+    vcodec = p.TextField(null=True)
+    video_ext = p.TextField(null=True)
     width = p.IntegerField(null=True)
 
 
 class RequestedDownload(BaseModel):
-    write_download_archive = p.BooleanField()
-    filename = p.TextField()
-    abr = p.DoubleField()
-    acodec = p.TextField()
-    aspect_ratio = p.DoubleField()
-    audio_ext = p.TextField()
-    columns = p.IntegerField()
-    ext = p.TextField()
+    write_download_archive = p.BooleanField(null=True)
+    filename = p.TextField(null=True)
+    abr = p.DoubleField(null=True)
+    acodec = p.TextField(null=True)
+    aspect_ratio = p.DoubleField(null=True)
+    audio_ext = p.TextField(null=True)
+    columns = p.IntegerField(null=True)
+    ext = p.TextField(null=True)
     filesize_approx = p.IntegerField(null=True)
-    format = p.TextField()
+    format = p.TextField(null=True)
     format_id = p.TextField(unique=True)
-    format_note = p.TextField()
-    fps = p.DoubleField()
-    height = p.IntegerField()
-    protocol = p.TextField()
-    resolution = p.TextField()
-    tbr = p.DoubleField()
-    vbr = p.DoubleField()
-    vcodec = p.TextField()
-    width = p.IntegerField()
+    format_note = p.TextField(null=True)
+    fps = p.DoubleField(null=True)
+    height = p.IntegerField(null=True)
+    protocol = p.TextField(null=True)
+    resolution = p.TextField(null=True)
+    tbr = p.DoubleField(null=True)
+    vbr = p.DoubleField(null=True)
+    vcodec = p.TextField(null=True)
+    width = p.IntegerField(null=True)
 
 
 class VideoThumbnail(BaseModel):
     thumbnail_id = p.TextField(null=True)
     preference = p.IntegerField(null=True)
-    url = p.TextField()
+    url = p.TextField(null=True)
 
 
 class Payload(BaseModel):
-    type_of = p.TextField()
+    type_of = p.TextField(null=True)
     availability = p.BooleanField(null=True)
     channel = p.TextField(unique=True)
     channel_follower_count = p.IntegerField(null=True)
     channel_id = p.TextField(unique=True)
-    channel_url = p.TextField()
-    description = p.TextField()
-    epoch = p.DateTimeField()
-    extractor = p.TextField()
-    extractor_key = p.TextField()
+    channel_url = p.TextField(null=True)
+    description = p.TextField(null=True)
+    epoch = p.DateTimeField(null=True)
+    extractor = p.TextField(null=True)
+    extractor_key = p.TextField(null=True)
     payload_id = p.TextField(unique=True)
     modified_date = p.DateTimeField(null=True)
-    original_url = p.TextField()
+    original_url = p.TextField(null=True)
     playlist_count = p.IntegerField(null=True)
     release_year = p.IntegerField(null=True)
     title = p.TextField(unique=True)
     uploader = p.TextField(unique=True)
     uploader_id = p.TextField(unique=True)
-    uploader_url = p.TextField()
+    uploader_url = p.TextField(null=True)
     view_count = p.IntegerField(null=True)
-    webpage_url = p.TextField()
-    webpage_url_basename = p.TextField()
+    webpage_url = p.TextField(null=True)
+    webpage_url_basename = p.TextField(null=True)
     webpage_url_host = p.TextField(null=True)
 
 
@@ -181,20 +181,20 @@ class Entry(BaseModel):
 
 class SubtitleType(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    language = p.TextField()
+    language = p.TextField(null=True)
 
 
 class Subtitle(BaseModel):
     video_id = p.ForeignKeyField(Entry)
     subtitle_type = p.ForeignKeyField(SubtitleType)
-    ext = p.TextField()
-    name = p.TextField()
-    url = p.TextField()
+    ext = p.TextField(null=True)
+    name = p.TextField(null=True)
+    url = p.TextField(null=True)
 
 
 class VideoCategory(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    category = p.TextField()
+    category = p.TextField(null=True)
 
 
 class ChannelCategory(BaseModel):
@@ -209,16 +209,16 @@ class AutomaticCaptions(BaseModel):
 
 class Caption(BaseModel):
     auto_cap = p.ForeignKeyField(AutomaticCaptions)
-    ext = p.TextField()
+    ext = p.TextField(null=True)
     protocol = p.TextField(null=True)
-    url = p.TextField()
+    url = p.TextField(null=True)
 
 
 class Chapter(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    start_time = p.DoubleField()
-    end_time = p.DoubleField()
-    title = p.TextField()
+    start_time = p.DoubleField(null=True)
+    end_time = p.DoubleField(null=True)
+    title = p.TextField(null=True)
 
 
 class ChannelThumbnail(BaseModel):
@@ -226,27 +226,27 @@ class ChannelThumbnail(BaseModel):
     thumbnail_id = p.TextField(null=True)
     preference = p.IntegerField(null=True)
     resolution = p.TextField(null=True)
-    url = p.TextField()
+    url = p.TextField(null=True)
     width = p.IntegerField(null=True)
     height = p.IntegerField(null=True)
 
 
 class Fragment(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    duration = p.DoubleField()
-    url = p.TextField()
+    duration = p.DoubleField(null=True)
+    url = p.TextField(null=True)
 
 
 class Heatmap(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    end_time = p.DoubleField()
-    start_time = p.DoubleField()
-    value = p.DoubleField()
+    end_time = p.DoubleField(null=True)
+    start_time = p.DoubleField(null=True)
+    value = p.DoubleField(null=True)
 
 
 class VideoTag(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    tag = p.TextField()
+    tag = p.TextField(null=True)
 
 
 class ChannelTag(BaseModel):
@@ -258,8 +258,8 @@ class Version(BaseModel):
     channel_id = p.ForeignKeyField(Payload)
     current_git_head = p.TextField(null=True)
     release_git_head = p.TextField(null=True)
-    repository = p.TextField()
-    version = p.TextField()
+    repository = p.TextField(null=True)
+    version = p.TextField(null=True)
 
 
 tables = [
