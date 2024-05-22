@@ -257,7 +257,7 @@ class ChannelTag(BaseModel):
 class Version(BaseModel):
     channel_id = p.ForeignKeyField(Payload)
     current_git_head = p.TextField(null=True)
-    release_git_head = p.TextField(unique=True)
+    release_git_head = p.TextField(null=True)
     repository = p.TextField()
     version = p.TextField()
 
