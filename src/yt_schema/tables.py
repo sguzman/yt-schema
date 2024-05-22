@@ -141,7 +141,7 @@ class Entry(BaseModel):
     format_id = p.TextField(null=True)
     format_note = p.TextField(null=True)
     fps = p.IntegerField(null=True)
-    fulltitle = p.TextField(unique=True)
+    fulltitle = p.TextField(null=True)
     height = p.IntegerField(null=True)
     entry_id = p.TextField(unique=True)
     is_live = p.BooleanField(null=True)
