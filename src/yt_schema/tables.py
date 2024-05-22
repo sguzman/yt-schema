@@ -143,7 +143,7 @@ class Entry(BaseModel):
     fps = p.IntegerField(null=True)
     fulltitle = p.TextField(null=True)
     height = p.IntegerField(null=True)
-    entry_id = p.TextField(unique=True)
+    entry_id = p.TextField(null=True)
     is_live = p.BooleanField(null=True)
     language = p.TextField(null=True)
     like_count = p.IntegerField(null=True)
