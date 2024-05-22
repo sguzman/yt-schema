@@ -4,7 +4,7 @@ import peewee as p
 from typing import Dict, List
 
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 db: p.SqliteDatabase = p.SqliteDatabase("yt.db")
@@ -251,7 +251,7 @@ class VideoTag(BaseModel):
 
 class ChannelTag(BaseModel):
     channel_id = p.ForeignKeyField(Payload)
-    tag = p.TextField(unique=True)
+    tag = p.TextField(null=True)
 
 
 class Version(BaseModel):

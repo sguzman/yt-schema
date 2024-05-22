@@ -12,7 +12,7 @@ def load_json(name: str):
 
 # Enable timestamp and log level in log messages
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 
