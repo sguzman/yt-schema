@@ -2,7 +2,7 @@ import logging
 import os
 import json
 
-from yt_schema.tables import create
+from yt_schema import tables, timeseries
 
 
 def load_json(name: str):
@@ -23,7 +23,9 @@ def main():
         if file.endswith("pretty.json"):
             js = load_json(file)
             logging.info(f"Creating table for {file}")
-            create(js)
+            timeseries.create(js)
+            tables.create(js)
+
     logging.info("end")
 
 
