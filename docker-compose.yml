@@ -1,24 +1,30 @@
-# Use root/example as user/password credentials
-version: '3.1'
+# A Docker Compose must always start with the version tag.
+# We use '3' because it's the last version.
+version: '3'
 
+# You should know that Docker Compose works with services.
+# 1 service = 1 container.
+# For example, a service, a server, a client, a database...
+# We use the keyword 'services' to start to create services.
 services:
+  # The name of our service is "database"
+  # but you can use the name of your choice.
+  # Note: This may change the commands you are going to use a little bit.
+  database:
+    # Official Postgres image from DockerHub (we use the last version)
+    image: 'postgres:latest'
 
-  mongo:
-    image: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+    # By default, a Postgres database is running on the 5432 port.
+    # If we want to access the database from our computer (outside the container),
+    # we must share the port with our computer's port.
+    # The syntax is [port we want on our machine]:[port we want to retrieve in the container]
+    # Note: You are free to change your computer's port,
+    # but take into consideration that it will change the way
+    # you are connecting to your database.
     ports:
-      - 27017:27017
+      - 5555:5432
 
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8089:8081
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
-      ME_CONFIG_BASICAUTH: false
+      POSTGRES_USER: admin # The PostgreSQL user (useful to connect to the database)
+      POSTGRES_PASSWORD: admin # The PostgreSQL password (useful to connect to the database)
+      POSTGRES_DB: youtube # The PostgreSQL default database (automatically created at first launch)
