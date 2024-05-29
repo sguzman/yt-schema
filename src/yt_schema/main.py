@@ -19,12 +19,13 @@ logging.basicConfig(
 def main():
     logging.info("start")
     # For each json file in the resources folder, create a table
-    for file in os.listdir("resources"):
-        if file.endswith("pretty.json"):
-            js = load_json(file)
-            logging.info(f"Creating table for {file}")
-            timeseries.create(js)
-            tables.create(js)
+    # Make a sorted list of the files in the resources folder
+    files = sorted(filter(lambda s: s.endswith("pretty.json"), os.listdir("resources")))
+    for file in files:
+        js = load_json(file)
+        logging.info(f"Creating table for {file}")
+        timeseries.create(js)
+        tables.create(js)
 
     logging.info("end")
 

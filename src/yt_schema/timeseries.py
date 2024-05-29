@@ -60,27 +60,56 @@ db.create_tables(tables)
 
 def video(data: List[Dict]):
     logging.info("video stats")
+
     for entry in data:
+        # Continue if any of the required keys are missing
+        if "id" not in entry or "view_count" not in entry:
+            continue
+
+        # Continue if entries are none
+        if entry["id"] is None or entry["view_count"] is None:
+            continue
+
+        comment_count = 0
+        if "comment_count" in entry:
+            comment_count = entry["comment_count"]
         VideoStats.create(
-            video_id=entry["display_id"],
+            video_id=entry["id"],
             view_count=entry["view_count"],
-            comment_count=entry["comment_count"],
+            comment_count=comment_count,
         )
 
 
 # Sum up all view counts for each channel from all entries
 def view_sum(data: Dict):
     logging.info("view sum")
-    return sum([entry["view_count"] for entry in data["entries"]])
+    # Ignore null entries
+    return sum(
+        [
+            entry["view_count"]
+            for entry in data["entries"]
+            if "view_count" in entry and entry["view_count"] is not None
+        ]
+    )
 
 
-def channel(data: Dict, entry_ref: Dict):
+# Find key from list of dictionaries until the key is found
+def find_key(d: Dict, key: str):
+    data = d["entries"]
+    logging.info("find key")
+    for entry in data:
+        if key in entry:
+            return entry[key]
+    return None
+
+
+def channel(data: Dict):
     logging.info("channel stats")
 
     ChannelStats.create(
         channel_id=data["channel_id"],
-        subscriber_count=entry_ref["channel_follower_count"],
-        video_count=entry_ref["__last_playlist_index"],
+        subscriber_count=find_key(data, "channel_follower_count"),
+        video_count=len(data["entries"]),
         view_count=view_sum(data),
     )
 
@@ -88,6 +117,5 @@ def channel(data: Dict, entry_ref: Dict):
 def create(data: Dict):
     logging.info("create stats")
     # Log keys in the data dictionary
-    logging.info(data.keys())
-    channel(data, data["entries"][0])
+    channel(data)
     video(data["entries"])
