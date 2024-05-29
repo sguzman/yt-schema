@@ -1,6 +1,5 @@
 import atexit
 import datetime
-import json
 import logging
 import pytz
 import peewee as p
@@ -216,7 +215,7 @@ class ChannelCategory(BaseModel):
 
 class AutomaticCaptions(BaseModel):
     video_id = p.ForeignKeyField(Entry)
-    language = p.CharField(max_length=2)
+    language = p.TextField()
 
 
 class Caption(BaseModel):
@@ -351,7 +350,6 @@ def formats(video: Entry, data: List[Dict]):
 
     logging.info(f"{len(data)} formats")
     for d in data:
-        logging.info(json.dumps(d, indent=4))
         Format.create(
             video_id=video,
             abr=d.get("abr"),
@@ -481,7 +479,7 @@ def caption(video: Entry, auto_captions: AutomaticCaptions, data: Dict):
     if data is None:
         return
 
-    logging.info(f"{len(data)} captions")
+    logging.debug(f"{len(data)} captions")
     for d in data:
         Caption.create(
             video_id=video,
