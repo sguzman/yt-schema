@@ -1,5 +1,8 @@
 import atexit
+import datetime
+import json
 import logging
+import pytz
 import peewee as p
 from typing import Dict, List
 
@@ -30,36 +33,9 @@ class BaseModel(p.Model):
         database = db
 
 
-class FormatSortField(BaseModel):
-    field = p.TextField(unique=True)
-
-
 class HttpHeader(BaseModel):
     key = p.TextField(null=True)
     value = p.TextField(null=True)
-
-
-class Format(BaseModel):
-    abr = p.DoubleField(null=True)
-    acodec = p.TextField(null=True)
-    aspect_ratio = p.DoubleField(null=True)
-    audio_ext = p.TextField(null=True)
-    columns = p.IntegerField(null=True)
-    ext = p.TextField(null=True)
-    filesize_approx = p.IntegerField(null=True)
-    format = p.TextField(null=True)
-    format_id = p.TextField(null=True)
-    format_note = p.TextField(null=True)
-    fps = p.DoubleField(null=True)
-    height = p.IntegerField(null=True)
-    protocol = p.TextField(null=True)
-    resolution = p.TextField(null=True)
-    tbr = p.DoubleField(null=True)
-    url = p.TextField(null=True)
-    vbr = p.IntegerField(null=True)
-    vcodec = p.TextField(null=True)
-    video_ext = p.TextField(null=True)
-    width = p.IntegerField(null=True)
 
 
 class RequestedDownload(BaseModel):
@@ -83,12 +59,6 @@ class RequestedDownload(BaseModel):
     vbr = p.DoubleField(null=True)
     vcodec = p.TextField(null=True)
     width = p.IntegerField(null=True)
-
-
-class VideoThumbnail(BaseModel):
-    thumbnail_id = p.TextField(null=True)
-    preference = p.IntegerField(null=True)
-    url = p.TextField(null=True)
 
 
 class Payload(BaseModel):
@@ -183,6 +153,42 @@ class Entry(BaseModel):
     webpage_url_basename = p.TextField(null=True)
     webpage_url_domain = p.TextField(null=True)
     width = p.IntegerField(null=True)
+
+
+class Format(BaseModel):
+    abr = p.DoubleField(null=True)
+    acodec = p.TextField(null=True)
+    aspect_ratio = p.DoubleField(null=True)
+    audio_ext = p.TextField(null=True)
+    columns = p.IntegerField(null=True)
+    ext = p.TextField(null=True)
+    filesize_approx = p.BigIntegerField(null=True)
+    format = p.TextField(null=True)
+    format_id = p.TextField(null=True)
+    format_note = p.TextField(null=True)
+    fps = p.DoubleField(null=True)
+    height = p.IntegerField(null=True)
+    protocol = p.TextField(null=True)
+    resolution = p.TextField(null=True)
+    tbr = p.DoubleField(null=True)
+    url = p.TextField(null=True)
+    vbr = p.IntegerField(null=True)
+    vcodec = p.TextField(null=True)
+    video_ext = p.TextField(null=True)
+    width = p.IntegerField(null=True)
+    video_id = p.ForeignKeyField(Entry)
+
+
+class VideoThumbnail(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    thumbnail_id = p.TextField(null=True)
+    preference = p.IntegerField(null=True)
+    url = p.TextField(null=True)
+
+
+class FormatSortField(BaseModel):
+    video_id = p.ForeignKeyField(Entry)
+    field = p.TextField(unique=True)
 
 
 class SubtitleType(BaseModel):
@@ -312,7 +318,7 @@ def fragments(video: Entry, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} fragments")
+    logging.debug(f"{len(data)} fragments")
 
     for d in data:
         Fragment.create(
@@ -327,7 +333,7 @@ def http_headers(video: Entry, data: Dict):
     if data is None:
         return
 
-    logging.info(f"{len(data)} http_headers")
+    logging.debug(f"{len(data)} http_headers")
     for d in data.keys():
         key = d
         value = data.get(d)
@@ -345,6 +351,7 @@ def formats(video: Entry, data: List[Dict]):
 
     logging.info(f"{len(data)} formats")
     for d in data:
+        logging.info(json.dumps(d, indent=4))
         Format.create(
             video_id=video,
             abr=d.get("abr"),
@@ -531,6 +538,8 @@ def entries(data: List[Dict]):
 
     for d in data:
         logging.info(f"Video: {d.get('title')}")
+        local_time = local(d.get("epoch"))
+
         e = Entry.create(
             last_playlist_index=d.get("__last_playlist_index"),
             has_drm=d.get("has_drm"),
@@ -553,7 +562,7 @@ def entries(data: List[Dict]):
             duration=d.get("duration"),
             duration_string=d.get("duration_string"),
             dynamic_range=d.get("dynamic_range"),
-            epoch=d.get("epoch"),
+            epoch=local_time,
             ext=d.get("ext"),
             extractor=d.get("extractor"),
             extractor_key=d.get("extractor_key"),
@@ -689,8 +698,19 @@ def channel_thumbnails(channel: Payload, data: List[Dict]):
         )
 
 
+def local(epoch: int) -> datetime:
+    # Get the current timezone
+    local_tz = pytz.timezone("America/Los_Angeles")
+
+    # Convert the timestamp to the local timezone
+    epoch = datetime.datetime.fromtimestamp(epoch)
+    return epoch.replace(tzinfo=pytz.utc).astimezone(local_tz)
+
+
 def payload(data: Dict) -> Payload:
     logging.info("payload")
+
+    local_time = local(data.get("epoch"))
 
     p = Payload.create(
         type_of=data.get("_type"),
@@ -700,7 +720,7 @@ def payload(data: Dict) -> Payload:
         channel_id=data.get("channel_id"),
         channel_url=data.get("channel_url"),
         description=data.get("description"),
-        epoch=data.get("epoch"),
+        epoch=local_time,
         extractor=data.get("extractor"),
         extractor_key=data.get("extractor_key"),
         payload_id=data.get("id"),

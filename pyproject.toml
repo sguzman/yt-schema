@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "peewee>=3.17.5",
     "psycopg2>=2.9.9",
+    "pytz>=2024.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

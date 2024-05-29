@@ -12,3 +12,5 @@ peewee==3.17.5
     # via yt-schema
 psycopg2==2.9.9
     # via yt-schema
+pytz==2024.1
+    # via yt-schema
