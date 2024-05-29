@@ -3,7 +3,7 @@ import datetime
 import logging
 import pytz
 import peewee as p
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -537,6 +537,7 @@ def entries(data: List[Dict]):
     for d in data:
         logging.info(f"Video: {d.get('title')}")
         local_time = local(d.get("epoch"))
+        local_ts = local(d.get("release_timestamp"))
 
         e = Entry.create(
             last_playlist_index=d.get("__last_playlist_index"),
@@ -584,7 +585,7 @@ def entries(data: List[Dict]):
             playlist_uploader=d.get("playlist_uploader"),
             playlist_uploader_id=d.get("playlist_uploader_id"),
             protocol=d.get("protocol"),
-            release_timestamp=d.get("release_timestamp"),
+            release_timestamp=local_ts,
             release_year=d.get("release_year"),
             requested_subtitles=d.get("requested_subtitles"),
             resolution=d.get("resolution"),
@@ -696,7 +697,10 @@ def channel_thumbnails(channel: Payload, data: List[Dict]):
         )
 
 
-def local(epoch: int) -> datetime:
+def local(epoch: Optional[int]) -> Optional[datetime.datetime]:
+    if epoch is None:
+        return None
+
     # Get the current timezone
     local_tz = pytz.timezone("America/Los_Angeles")
 
