@@ -7,7 +7,13 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
-db: p.SqliteDatabase = p.SqliteDatabase("yt.db")
+db: p.PostgresqlDatabase = p.PostgresqlDatabase(
+    "youtube",  # Required by Peewee.
+    user="admin",  # Will be passed directly to psycopg2.
+    password="admin",  # Ditto.
+    host="localhost",
+    port="5555",
+)  # Ditto.
 db.connect()
 
 
