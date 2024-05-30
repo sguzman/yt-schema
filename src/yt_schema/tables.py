@@ -342,36 +342,52 @@ def formats(video: Entry, data: List[Dict]):
         return
 
     logging.debug(f"{len(data)} formats")
+
+    Format.insert_many(
+        [
+            (
+                d.get("abr"),
+                d.get("acodec"),
+                d.get("aspect_ratio"),
+                d.get("audio_ext"),
+                d.get("columns"),
+                d.get("ext"),
+                d.get("filesize_approx"),
+                d.get("format"),
+                d.get("format_id"),
+                d.get("format_note"),
+                d.get("fps"),
+                d.get("height"),
+                d.get("protocol"),
+                d.get("resolution"),
+                d.get("tbr"),
+                d.get("url"),
+                d.get("vbr"),
+                d.get("vcodec"),
+                d.get("video_ext"),
+                d.get("width"),
+                video.get_id(),
+            )
+            for d in data
+        ]
+    ).execute()
+
+    all_frags = []
+    all_http = []
     for d in data:
-        Format.create(
-            video_id=video,
-            abr=d.get("abr"),
-            acodec=d.get("acodec"),
-            aspect_ratio=d.get("aspect_ratio"),
-            audio_ext=d.get("audio_ext"),
-            columns=d.get("columns"),
-            ext=d.get("ext"),
-            filesize_approx=d.get("filesize_approx"),
-            format=d.get("format"),
-            format_id=d.get("format_id"),
-            format_note=d.get("format_note"),
-            fps=d.get("fps"),
-            height=d.get("height"),
-            protocol=d.get("protocol"),
-            resolution=d.get("resolution"),
-            tbr=d.get("tbr"),
-            url=d.get("url"),
-            vbr=d.get("vbr"),
-            vcodec=d.get("vcodec"),
-            video_ext=d.get("video_ext"),
-            width=d.get("width"),
-        )
+        for f in d.get("fragments", []):
+            tup = (video.get_id(), d.get("duration"), d.get("url"))
+            all_frags.append(tup)
 
-        # Fragment
-        fragments(video, d.get("fragments"))
+        for h in d.get("http_headers", []).keys():
+            tup = (video.get_id(), h, d.get("http_headers").get(h))
+            all_http.append(tup)
 
-        # Http Headers
-        http_headers(video, d.get("http_headers"))
+    logging.debug(f"{len(all_frags)} fragments")
+    Fragment.insert_many(all_frags).execute()
+
+    logging.debug(f"{len(all_http)} http_headers")
+    HttpHeader.insert_many(all_http).execute()
 
 
 def heatmaps(video: Entry, data: List[Dict]):
@@ -422,6 +438,65 @@ def requested_download(video: Entry, data: List[Dict]):
 
         # Requested Formats
         formats(video, d.get("requested_formats"))
+
+    RequestedDownload.insert_many(
+        [
+            (
+                d.get("write_download_archive"),
+                d.get("filename"),
+                d.get("abr"),
+                d.get("acodec"),
+                d.get("aspect_ratio"),
+                d.get("audio_ext"),
+                d.get("columns"),
+                d.get("ext"),
+                d.get("filesize_approx"),
+                d.get("format"),
+                d.get("format_id"),
+                d.get("format_note"),
+                d.get("fps"),
+                d.get("height"),
+                d.get("protocol"),
+                d.get("resolution"),
+                d.get("tbr"),
+                d.get("vbr"),
+                d.get("vcodec"),
+                d.get("width"),
+            )
+            for d in data
+        ]
+    ).execute()
+
+    all_forms = []
+    for f in data:
+        for d in f.get("requested_formats", []):
+            tup = (
+                d.get("abr"),
+                d.get("acodec"),
+                d.get("aspect_ratio"),
+                d.get("audio_ext"),
+                d.get("columns"),
+                d.get("ext"),
+                d.get("filesize_approx"),
+                d.get("format"),
+                d.get("format_id"),
+                d.get("format_note"),
+                d.get("fps"),
+                d.get("height"),
+                d.get("protocol"),
+                d.get("resolution"),
+                d.get("tbr"),
+                d.get("url"),
+                d.get("vbr"),
+                d.get("vcodec"),
+                d.get("video_ext"),
+                d.get("width"),
+                video.get_id(),
+            )
+            all_forms.append(tup)
+
+    logging.debug(f"{len(all_forms)} requested_formats")
+    Format.insert_many(all_forms).execute()
 
 
 def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
