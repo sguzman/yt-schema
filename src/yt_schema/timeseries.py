@@ -1,10 +1,11 @@
 import atexit
 import logging
+import datetime
 import peewee as p
 from typing import Dict, List
 
 logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
 )
 
 db: p.PostgresqlDatabase = p.PostgresqlDatabase(
@@ -34,15 +35,17 @@ class BaseModel(p.Model):
 
 
 class VideoStats(BaseModel):
-    video_id = p.TextField()
     timestamp = p.DateTimeField(default=p.datetime.datetime.now)
+
+    video_id = p.TextField()
     view_count = p.BigIntegerField()
-    comment_count = p.BigIntegerField()
+    comment_count = p.BigIntegerField(null=True)
 
 
 class ChannelStats(BaseModel):
-    channel_id = p.TextField()
     timestamp = p.DateTimeField(default=p.datetime.datetime.now)
+    channel_id = p.TextField()
+
     subscriber_count = p.BigIntegerField()
     video_count = p.IntegerField()
     view_count = p.BigIntegerField()
@@ -61,61 +64,55 @@ db.create_tables(tables)
 def video(data: List[Dict]):
     logging.info("video stats")
 
-    for entry in data:
-        # Continue if any of the required keys are missing
-        if "id" not in entry or "view_count" not in entry:
-            continue
-
-        # Continue if entries are none
-        if entry["id"] is None or entry["view_count"] is None:
-            continue
-
-        comment_count = 0
-        if "comment_count" in entry:
-            comment_count = entry["comment_count"]
-        VideoStats.create(
-            video_id=entry["id"],
-            view_count=entry["view_count"],
-            comment_count=comment_count,
-        )
-
-
-# Sum up all view counts for each channel from all entries
-def view_sum(data: Dict):
-    logging.info("view sum")
-    # Ignore null entries
-    return sum(
+    VideoStats.insert_many(
         [
-            entry["view_count"]
-            for entry in data["entries"]
-            if "view_count" in entry and entry["view_count"] is not None
+            (
+                datetime.datetime.now(),
+                d.get("display_id"),
+                d.get("view_count"),
+                d.get("comment_count"),
+            )
+            for d in data
         ]
-    )
+    ).execute()
 
 
-# Find key from list of dictionaries until the key is found
-def find_key(d: Dict, key: str):
-    data = d["entries"]
-    logging.info("find key")
-    for entry in data:
-        if key in entry:
-            return entry[key]
-    return None
+# find all entries objects
+# If current object has an "entries" key, call this function again with the value of "entries"
+# Entry objects SHOULD NOT have an "entries" key
+def find_all_entries(data: Dict, total=[]) -> List[Dict]:
+    all_entries = []
+
+    if "entries" in data:
+        for entry in data["entries"]:
+            if "entries" in entry:
+                all_entries.extend(entry["entries"])
+            else:
+                all_entries.append(entry)
+
+    return all_entries
 
 
 def channel(data: Dict):
-    logging.info("channel stats")
+    logging.debug(f"channel stats: {data['channel']}")
+
+    all_entries = find_all_entries(data)
+
+    # Sum up all view counts for each channel from all entries
+    entries = [entry["view_count"] for entry in all_entries]
+
+    view_sum = sum(entries)
 
     ChannelStats.create(
         channel_id=data["channel_id"],
-        subscriber_count=find_key(data, "channel_follower_count"),
-        video_count=len(data["entries"]),
-        view_count=view_sum(data),
+        subscriber_count=data["channel_follower_count"],
+        video_count=len(all_entries),
+        view_count=view_sum,
     )
+
+    video(all_entries)
 
 
 def create(data: Dict):
-    logging.info("create stats")
     # Log keys in the data dictionary
     channel(data)
-    video(data["entries"])
