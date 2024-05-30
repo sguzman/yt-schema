@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import multiprocessing
 
 from typing import Dict
 from yt_schema import tables, timeseries
@@ -55,12 +56,12 @@ def payload(file: str):
 
 def main():
     logging.info("start")
+    pool = multiprocessing.Pool(2)
     tables.init()
     # For each json file in the resources folder, create a table
     # Make a sorted list of the files in the resources folder
     files = sorted(filter(lambda s: s.endswith("pretty.json"), os.listdir("resources")))
-    for f in files:
-        payload(f)
+    pool.map(payload, files)
     logging.info("end")
 
 

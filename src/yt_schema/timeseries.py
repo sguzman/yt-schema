@@ -2,7 +2,7 @@ import atexit
 import logging
 import datetime
 import peewee as p
-from typing import Dict, List
+from typing import Dict, List, Union
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
@@ -93,17 +93,28 @@ def find_all_entries(data: Dict, total=[]) -> List[Dict]:
     return all_entries
 
 
-def channel(data: Dict):
+def channel(data: Dict[str, Union[str, int, List[Dict[str, Union[str, int]]]]]) -> None:
+    """
+    Record channel statistics.
+
+    Args:
+        data (Dict[str, Union[str, int, List[Dict[str, Union[str, int]]]]]):
+            Dictionary containing channel statistics.
+
+    Returns:
+        None
+    """
     logging.debug(f"channel stats: {data['channel']}")
 
-    all_entries = find_all_entries(data)
+    all_entries: List[Dict[str, Union[str, int]]] = find_all_entries(data)
 
     # Sum up all view counts for each channel from all entries
-    entries = [entry["view_count"] for entry in all_entries]
+    entries: List[int] = [entry["view_count"] for entry in all_entries]
 
-    view_sum = sum(entries)
+    view_sum: int = sum(entries)
 
     ChannelStats.create(
+        timestamp=datetime.datetime.now(),
         channel_id=data["channel_id"],
         subscriber_count=data["channel_follower_count"],
         video_count=len(all_entries),
