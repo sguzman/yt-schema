@@ -319,12 +319,9 @@ def fragments(video: Entry, data: List[Dict]):
 
     logging.debug(f"{len(data)} fragments")
 
-    for d in data:
-        Fragment.create(
-            video_id=video,
-            duration=d.get("duration"),
-            url=d.get("url"),
-        )
+    Fragment.insert_many(
+        [(video.get_id(), d.get("duration"), d.get("url")) for d in data]
+    ).execute()
 
 
 def http_headers(video: Entry, data: Dict):
@@ -383,13 +380,13 @@ def heatmaps(video: Entry, data: List[Dict]):
         return
 
     logging.info(f"{len(data)} heatmaps")
-    for d in data:
-        Heatmap.create(
-            video_id=video,
-            end_time=d.get("end_time"),
-            start_time=d.get("start_time"),
-            value=d.get("value"),
-        )
+
+    Heatmap.insert_many(
+        [
+            (video.get_id(), d.get("end_time"), d.get("start_time"), d.get("value"))
+            for d in data
+        ]
+    ).execute()
 
 
 def requested_download(video: Entry, data: List[Dict]):
@@ -434,14 +431,18 @@ def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
 
     logging.debug(f"{len(data)} subtitles")
 
-    for sub in data:
-        Subtitle.create(
-            video_id=video,
-            subtitle_type=s,
-            ext=sub.get("ext"),
-            name=sub.get("name"),
-            url=sub.get("url"),
-        )
+    Subtitle.insert_many(
+        [
+            (
+                video.get_id(),
+                s.get_id(),
+                d.get("ext"),
+                d.get("name"),
+                d.get("url"),
+            )
+            for d in data
+        ]
+    ).execute()
 
 
 def subtitle_type(video: Entry, data: Dict):
@@ -466,8 +467,7 @@ def format_sort_field(video: Entry, data: List[str]):
         return
 
     logging.info(f"{len(data)} format_sort_field")
-    for d in data:
-        FormatSortField.create(video_id=video, field=d)
+    FormatSortField.insert_many([(video.get_id(), d) for d in data]).execute()
 
 
 def caption(video: Entry, auto_captions: AutomaticCaptions, data: Dict):
@@ -509,8 +509,7 @@ def video_categories(video: Entry, data: List[str]):
         return
 
     logging.debug(f"{len(data)} video categories")
-    for d in data:
-        VideoCategory.create(video_id=video, category=d)
+    VideoCategory.insert_many([(video.get_id(), d) for d in data]).execute()
 
 
 def chapters(video: Entry, data: List[Dict]):
@@ -519,16 +518,26 @@ def chapters(video: Entry, data: List[Dict]):
         return
 
     logging.debug(f"{len(data)} chapters")
-    for d in data:
-        Chapter.create(
-            video_id=video,
-            start_time=d.get("start_time"),
-            end_time=d.get("end_time"),
-            title=d.get("title"),
-        )
+    Chapter.insert_many(
+        [
+            (
+                video.get_id(),
+                d.get("start_time"),
+                d.get("end_time"),
+                d.get("title"),
+            )
+            for d in data
+        ]
+    ).execute()
 
-        # Fragments
-        fragments(video, d.get("fragments"))
+    all_frags = []
+    for d in data:
+        for f in d.get("fragments", []):
+            tup = (video.get_id(), d.get("duration"), d.get("url"))
+            all_frags.append(tup)
+
+    logging.debug(f"{len(all_frags)} fragments")
+    Fragment.insert_many(all_frags).execute()
 
 
 def entries(data: List[Dict]):
