@@ -348,7 +348,7 @@ def formats(video: Entry, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} formats")
+    logging.debug(f"{len(data)} formats")
     for d in data:
         Format.create(
             video_id=video,
@@ -436,7 +436,7 @@ def subtitles(video: Entry, s: SubtitleType, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} subtitles")
+    logging.debug(f"{len(data)} subtitles")
 
     for sub in data:
         Subtitle.create(
@@ -453,7 +453,7 @@ def subtitle_type(video: Entry, data: Dict):
     if data is None:
         return []
 
-    logging.info(f"{len(data)} subtitles")
+    logging.debug(f"{len(data)} subtitles")
     for sub in data.keys():
         s = SubtitleType.create(
             video_id=video,
@@ -495,7 +495,7 @@ def automatic_captions(video: Entry, data: Dict):
     if data is None:
         return
 
-    logging.info(f"{len(data)} automatic_captions")
+    logging.debug(f"{len(data)} automatic_captions")
     for d in data.keys():
         ac = AutomaticCaptions.create(video_id=video, language=d)
 
@@ -508,7 +508,7 @@ def video_categories(video: Entry, data: List[str]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} video categories")
+    logging.debug(f"{len(data)} video categories")
     for d in data:
         VideoCategory.create(video_id=video, category=d)
 
@@ -518,7 +518,7 @@ def chapters(video: Entry, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} chapters")
+    logging.debug(f"{len(data)} chapters")
     for d in data:
         Chapter.create(
             video_id=video,
@@ -532,9 +532,14 @@ def chapters(video: Entry, data: List[Dict]):
 
 
 def entries(data: List[Dict]):
-    logging.info(f"{len(data)} entries")
+    logging.debug(f"{len(data)} entries")
 
     for d in data:
+        if "entries" in d:
+            entries(d.get("entries"))
+            continue
+
+        # Video
         logging.info(f"Video: {d.get('title')}")
         local_time = local(d.get("epoch"))
         local_ts = local(d.get("release_timestamp"))
@@ -648,7 +653,7 @@ def video_tags(p: Entry, data: List[str]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} tags")
+    logging.debug(f"{len(data)} tags")
     for d in data:
         VideoTag.create(video_id=p, tag=d)
 
@@ -668,7 +673,7 @@ def video_thumbnails(v: Entry, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} video thumbnails")
+    logging.debug(f"{len(data)} video thumbnails")
 
     for d in data:
         VideoThumbnail.create(
@@ -684,7 +689,7 @@ def channel_thumbnails(channel: Payload, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} channel thumbnails")
+    logging.debug(f"{len(data)} channel thumbnails")
     for d in data:
         ChannelThumbnail.create(
             channel_id=channel,
@@ -710,7 +715,7 @@ def local(epoch: Optional[int]) -> Optional[datetime.datetime]:
 
 
 def payload(data: Dict) -> Payload:
-    logging.info("payload")
+    logging.info(f'Channel: {data.get("channel")}')
 
     local_time = local(data.get("epoch"))
 
