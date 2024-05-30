@@ -273,32 +273,41 @@ class Version(BaseModel):
     version = p.TextField(null=True)
 
 
-tables = [
-    Version,
-    FormatSortField,
-    Caption,
-    AutomaticCaptions,
-    ChannelCategory,
-    VideoCategory,
-    Chapter,
-    Fragment,
-    HttpHeader,
-    Format,
-    ChannelTag,
-    VideoTag,
-    Heatmap,
-    RequestedDownload,
-    Subtitle,
-    SubtitleType,
-    VideoThumbnail,
-    Entry,
-    ChannelThumbnail,
-    Payload,
-]
+def init():
+    setup: p.PostgresqlDatabase = p.PostgresqlDatabase(
+        "youtube",  # Required by Peewee.
+        user="admin",  # Will be passed directly to psycopg2.
+        password="admin",  # Ditto.
+        host="localhost",
+        port="5555",
+    )  # Ditto.
+    setup.connect()
+    tables = [
+        Version,
+        FormatSortField,
+        Caption,
+        AutomaticCaptions,
+        ChannelCategory,
+        VideoCategory,
+        Chapter,
+        Fragment,
+        HttpHeader,
+        Format,
+        ChannelTag,
+        VideoTag,
+        Heatmap,
+        RequestedDownload,
+        Subtitle,
+        SubtitleType,
+        VideoThumbnail,
+        Entry,
+        ChannelThumbnail,
+        Payload,
+    ]
 
-
-db.drop_tables(tables, safe=True)
-db.create_tables(tables)
+    setup.drop_tables(tables, safe=True)
+    setup.create_tables(tables)
+    setup.close()
 
 
 def version(channel: Payload, data: Dict):
