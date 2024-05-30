@@ -56,7 +56,7 @@ def payload(file: str):
 
 def main():
     logging.info("start")
-    pool = multiprocessing.Pool(2)
+    pool = multiprocessing.Pool(1)
     tables.init()
     # For each json file in the resources folder, create a table
     # Make a sorted list of the files in the resources folder

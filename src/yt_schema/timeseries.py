@@ -62,7 +62,7 @@ db.create_tables(tables)
 
 
 def video(data: List[Dict]):
-    logging.info("video stats")
+    logging.debug("video stats")
 
     VideoStats.insert_many(
         [
@@ -107,16 +107,19 @@ def channel(data: Dict[str, Union[str, int, List[Dict[str, Union[str, int]]]]]) 
     logging.debug(f"channel stats: {data['channel']}")
 
     all_entries: List[Dict[str, Union[str, int]]] = find_all_entries(data)
+    logging.debug(f"Num of entries: {len(all_entries)}")
 
     # Sum up all view counts for each channel from all entries
     entries: List[int] = [entry["view_count"] for entry in all_entries]
 
     view_sum: int = sum(entries)
 
+    logging.debug(f"Sum of views for channel: {view_sum}")
+
     ChannelStats.create(
         timestamp=datetime.datetime.now(),
         channel_id=data["channel_id"],
-        subscriber_count=data["channel_follower_count"],
+        subscriber_count=all_entries[0].get("channel_follower_count"),
         video_count=len(all_entries),
         view_count=view_sum,
     )
