@@ -404,7 +404,7 @@ def heatmaps(video: Entry, data: List[Dict]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} heatmaps")
+    logging.debug(f"{len(data)} heatmaps")
 
     Heatmap.insert_many(
         [
