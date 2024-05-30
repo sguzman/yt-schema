@@ -333,14 +333,10 @@ def http_headers(video: Entry, data: Dict):
         return
 
     logging.debug(f"{len(data)} http_headers")
-    for d in data.keys():
-        key = d
-        value = data.get(d)
-        HttpHeader.create(
-            video_id=video,
-            key=key,
-            value=value,
-        )
+
+    HttpHeader.insert_many(
+        [(video.get_id(), d, data.get(d)) for d in data.keys()]
+    ).execute()
 
 
 def formats(video: Entry, data: List[Dict]):
@@ -480,14 +476,18 @@ def caption(video: Entry, auto_captions: AutomaticCaptions, data: Dict):
         return
 
     logging.debug(f"{len(data)} captions")
-    for d in data:
-        Caption.create(
-            video_id=video,
-            auto_cap=auto_captions,
-            ext=d.get("ext"),
-            protocol=d.get("protocol"),
-            url=d.get("url"),
-        )
+    Caption.insert_many(
+        [
+            (
+                video.get_id(),
+                auto_captions,
+                d.get("ext"),
+                d.get("protocol"),
+                d.get("url"),
+            )
+            for d in data
+        ]
+    ).execute()
 
 
 def automatic_captions(video: Entry, data: Dict):
