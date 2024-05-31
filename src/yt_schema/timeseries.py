@@ -2,7 +2,7 @@ import atexit
 import logging
 import datetime
 import peewee as p
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
@@ -51,18 +51,49 @@ class ChannelStats(BaseModel):
     view_count = p.BigIntegerField()
 
 
-tables = [
-    VideoStats,
-    ChannelStats,
-]
+# Class for heatmap data
+class HeatmapStats(BaseModel):
+    timestamp = p.DateTimeField(default=p.datetime.datetime.now)
+    video_id = p.TextField()
+    start_time = p.DoubleField()
+    end_time = p.DoubleField()
+    value = p.DoubleField()
+
+
+tables = [VideoStats, ChannelStats, HeatmapStats]
 
 
 db.drop_tables(tables, safe=True)
 db.create_tables(tables)
 
 
+def heatmap(data: List[Dict]):
+    # Log number of heatmaps
+    logging.debug(f"{len(data)} heatmaps stats")
+
+    # Get video id
+    video_id = data[0].get("display_id")
+    hs: List[Tuple[datetime.datetime, str, float, float, float]] = []
+
+    for d in data:
+        if "heatmap" in d and d.get("heatmap") is not None:
+            for h in d.get("heatmap"):
+                hs.append(
+                    (
+                        datetime.datetime.now(),
+                        video_id,
+                        h.get("start_time"),
+                        h.get("end_time"),
+                        h.get("value"),
+                    )
+                )
+
+    HeatmapStats.insert_many(hs).execute()
+
+
 def video(data: List[Dict]):
-    logging.debug("video stats")
+    # Log number of videos
+    logging.debug(f"{len(data)} video stats")
 
     VideoStats.insert_many(
         [
@@ -125,6 +156,9 @@ def channel(data: Dict[str, Union[str, int, List[Dict[str, Union[str, int]]]]]) 
     )
 
     video(all_entries)
+
+    # Get heatmap data
+    heatmap(all_entries)
 
 
 def create(data: Dict):
