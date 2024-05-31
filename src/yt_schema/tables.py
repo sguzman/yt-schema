@@ -311,7 +311,7 @@ def init():
 
 
 def version(channel: Payload, data: Dict):
-    logging.info("version")
+    logging.debug("version")
     Version.create(
         channel_id=channel,
         current_git_head=data.get("current_git_head"),
@@ -625,7 +625,7 @@ def chapters(video: Entry, data: List[Dict]):
 
 
 def entries(data: List[Dict]):
-    logging.debug(f"{len(data)} entries")
+    logging.info(f"{len(data)} entries")
 
     for d in data:
         if "entries" in d:
@@ -746,7 +746,7 @@ def video_tags(p: Entry, data: List[str]):
     if data is None:
         return
 
-    logging.debug(f"{len(data)} tags")
+    logging.debug(f"{len(data)} video tags")
     for d in data:
         VideoTag.create(video_id=p, tag=d)
 
@@ -756,7 +756,7 @@ def channel_tags(p: Payload, data: List[str]):
     if data is None:
         return
 
-    logging.info(f"{len(data)} tags")
+    logging.debug(f"{len(data)} channel tags")
     for d in data:
         ChannelTag.create(channel_id=p, tag=d)
 
@@ -855,5 +855,5 @@ def payload(data: Dict) -> Payload:
 
 
 def create(data: Dict):
-    logging.info("create")
+    logging.debug("create")
     payload(data)
