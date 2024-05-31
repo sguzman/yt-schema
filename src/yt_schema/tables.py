@@ -625,15 +625,16 @@ def chapters(video: Entry, data: List[Dict]):
 
 
 def entries(data: List[Dict]):
-    logging.info(f"{len(data)} entries")
+    logging.debug(f"{len(data)} entries")
+    length = len(data)
 
-    for d in data:
+    for i, d in enumerate(data):
         if "entries" in d:
             entries(d.get("entries"))
             continue
 
         # Video
-        logging.info(f"Video: {d.get('title')}")
+        logging.info(f"[{i}/{length}] - Video: {d.get('title')}")
         local_time = local(d.get("epoch"))
         local_ts = local(d.get("release_timestamp"))
 
